@@ -11,5 +11,8 @@ class ParseHelper {
 			cb(returnArray);
 		});
 	}
+	saveSelection(objectID, selection, cb){
+		ParseModule.saveSelection(objectID,selection, () =>{cb()})
+	}
 }
 module.exports = new ParseHelper();

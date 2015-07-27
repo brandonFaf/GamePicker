@@ -310,6 +310,27 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		7FC158401B613BA600B2C7A2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7FC97F381B6018CD006B2AD6 /* Bolts.framework */,
+				7FC97F391B6018CD006B2AD6 /* Parse.framework */,
+				7FC97F361B60189B006B2AD6 /* libsqlite3.dylib */,
+				7FC97F341B60188F006B2AD6 /* libz.dylib */,
+				7FC97F161B60186D006B2AD6 /* Accounts.framework */,
+				7FC97F171B60186D006B2AD6 /* AudioToolbox.framework */,
+				7FC97F181B60186D006B2AD6 /* CFNetwork.framework */,
+				7FC97F191B60186D006B2AD6 /* CoreGraphics.framework */,
+				7FC97F1A1B60186D006B2AD6 /* CoreLocation.framework */,
+				7FC97F1B1B60186D006B2AD6 /* QuartzCore.framework */,
+				7FC97F1C1B60186D006B2AD6 /* Security.framework */,
+				7FC97F1D1B60186D006B2AD6 /* Social.framework */,
+				7FC97F1E1B60186D006B2AD6 /* StoreKit.framework */,
+				7FC97F1F1B60186D006B2AD6 /* SystemConfiguration.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
@@ -338,20 +359,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				7FC97F381B6018CD006B2AD6 /* Bolts.framework */,
-				7FC97F391B6018CD006B2AD6 /* Parse.framework */,
-				7FC97F361B60189B006B2AD6 /* libsqlite3.dylib */,
-				7FC97F341B60188F006B2AD6 /* libz.dylib */,
-				7FC97F161B60186D006B2AD6 /* Accounts.framework */,
-				7FC97F171B60186D006B2AD6 /* AudioToolbox.framework */,
-				7FC97F181B60186D006B2AD6 /* CFNetwork.framework */,
-				7FC97F191B60186D006B2AD6 /* CoreGraphics.framework */,
-				7FC97F1A1B60186D006B2AD6 /* CoreLocation.framework */,
-				7FC97F1B1B60186D006B2AD6 /* QuartzCore.framework */,
-				7FC97F1C1B60186D006B2AD6 /* Security.framework */,
-				7FC97F1D1B60186D006B2AD6 /* Social.framework */,
-				7FC97F1E1B60186D006B2AD6 /* StoreKit.framework */,
-				7FC97F1F1B60186D006B2AD6 /* SystemConfiguration.framework */,
+				7FC158401B613BA600B2C7A2 /* Frameworks */,
 				13B07FAE1A68108700A75B9A /* GamePicker */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* GamePickerTests */,

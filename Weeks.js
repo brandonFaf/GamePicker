@@ -26,12 +26,6 @@ class Week extends React.Component{
       rowHasChanged: (r1, r2) => r1 != r2
     });
 
-    // ParseModule.testQuery((results) =>{
-    //   console.log(results);
-    // })
-
-    console.log(Animated);
-
     this.state = {
       dataSource: ds.cloneWithRows([{week:'1',date:'Sept 9'},{week:2,date:'Sept 10'},{week:3,date:'Sept 11'},{week:4,date:'Sept 12'},{week:5,date:'Sept 13'},]),
       //dataSource: ds.cloneWithRows(['A','B','C'])
@@ -57,7 +51,7 @@ class Week extends React.Component{
         onPress={()=> this.pressRow(rowData)}
         underlayColor = '#ddd'>
       <View style ={styles.row}>
-        <Text style={{fontSize:20}}>Week {rowData.week}</Text>
+        <Text style={{fontSize:18}}>Week {rowData.week}</Text>
         <View style ={styles.rowText}>
            <Text style ={styles.dateText}>{rowData.date}</Text>
          </View>
@@ -88,7 +82,7 @@ var styles = StyleSheet.create({
   row:{
     flex:1,
     flexDirection:'row',
-    padding:20,
+    padding:18,
     borderBottomWidth: 1,
     borderColor: '#d7d7d7',
   },

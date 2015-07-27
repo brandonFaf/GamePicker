@@ -19,36 +19,59 @@ var Select = require('./Select');
 var QuickSelect = require('./QuickSelect');
 var ParseHelper = require('./ParseHelper');
 var ParseModule = require('NativeModules').ParseModule
+var _ = require('lodash')
 
 class Games extends React.Component{
   constructor(props){
     super(props);
     var ds = new ListView.DataSource({
-      rowHasChanged: (r1, r2) => r1 != r2
+      rowHasChanged: (r1, r2) => r1.Selection != r2.Selection
     });
     this.state = {
       dataSource: ds,
-      selectedTab:'quick',
+      selectedTab:'list',
       images:props.images
     }
   }
-  componentDidMount(){
-    ParseHelper.parseQuery('Games','Week',this.props.week,['Week','HomeTeam','AwayTeam'], (dataSource) =>{
-      console.log(this.state.dataSource);
-      var st = this.state;
-      this.setState({
-        dataSource: this.state.dataSource.cloneWithRows(dataSource),
-      })
-      console.log(this.state);
 
-    })
+  componentWillReceiveProps(nextProps){
+    if(nextProps.update){
+      console.log(nextProps.updatedSelection);
+      this.getGames();
+    }else{
+      // console.log("nothing");
+    }
+  }
+
+  getGames(){
+    console.log("network query");
+    ParseHelper.parseQuery('Games','Week',this.props.week,['Week','HomeTeam','AwayTeam'], (dataSource) =>{
+      ParseHelper.parseQuery('Selections','User',null,['Game','Selection'], (selections) =>{
+        dataSource.forEach((n,i)=>{
+          var choice = _.result(_.find(selections,'Game', n.objectID),'Selection');
+          if (choice) {
+            n.Selection = choice;
+          }else{
+            n.Selection = "";
+          }
+        });
+        this.setState({
+          dataSource: this.state.dataSource.cloneWithRows(dataSource),
+        });
+      });
+    });
+  }
+
+  componentDidMount(){
+    // console.log("componentDidMount");
+    this.getGames();
   }
   pressRow(rowData){
     this.props.navigator.push({
       title: 'Game',
       component: Select,
       passProps:{
-        pushEvent:rowData
+        gameData:rowData,
       }
     })
   }
@@ -59,7 +82,6 @@ class Games extends React.Component{
       passProps:{
       }
     })
-    console.log('show games for week ');    
   }
 
   renderRow(rowData){
@@ -68,7 +90,10 @@ class Games extends React.Component{
         onPress={()=> this.pressRow(rowData)}
         underlayColor = '#ddd'>
         <View style ={styles.row}>
-          <Text style={{fontSize:20}}>{rowData.AwayTeam} @ {rowData.HomeTeam} </Text>
+          <Text style={{fontSize:18}}>{rowData.AwayTeam} @ {rowData.HomeTeam} </Text>
+          <View style={{flex:1}}>
+            <Text style={styles.dateText}>{rowData[rowData.Selection]}</Text>
+          </View>
         </View>
       </TouchableHighlight>
 
@@ -111,12 +136,13 @@ var styles = StyleSheet.create({
   row:{
     flex:1,
     flexDirection:'row',
-    padding:20,
+    padding:18,
     borderBottomWidth: 1,
     borderColor: '#d7d7d7',
   },
   dateText:{
     fontSize:15,
+    paddingTop:3,
     color:'#b5b5b5',
     textAlign:'right'
   },

@@ -19,10 +19,7 @@
   [Parse enableLocalDatastore];
   
   NSDictionary *keys = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Keys" ofType:@"plist"]];
-  
-  NSLog(@"%@ \n %@ \n %@ \n %@ \n",keys[@"parseApplicationId"],keys[@"parseClientKey"],keys[@"twitterConsumerKey"],keys[@"twitterConsumerSecret"]);
-  
-  
+    
   // Initialize Parse.
   [Parse setApplicationId:keys[@"parseApplicationId"]
                 clientKey:keys[@"parseClientKey"]];

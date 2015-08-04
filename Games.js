@@ -25,28 +25,45 @@ class Games extends React.Component{
   constructor(props){
     super(props);
     var ds = new ListView.DataSource({
-      rowHasChanged: (r1, r2) => r1.Selection != r2.Selection
+      rowHasChanged: (r1, r2) => r1 != r2
     });
     this.state = {
       dataSource: ds,
-      selectedTab:'list',
+      selectedTab:'quick',
       images:props.images
     }
   }
 
   componentWillReceiveProps(nextProps){
-    if(nextProps.update){
-      console.log(nextProps.updatedSelection);
-      this.getGames();
+    if(nextProps.update && this.state.update){
+      var changed = _.findIndex(this.state.ds, 'objectID',nextProps.updatedGame);
+      var newDs = this.state.ds.slice();
+      newDs[changed] = {};
+      for(var prop in this.state.ds[changed]){
+        if(prop != "Selection"){
+          newDs[changed][prop] = this.state.ds[changed][prop];
+        }
+        else{
+          newDs[changed][prop] = this.state.ds[changed][prop] == "AwayTeam" ? "HomeTeam" : "AwayTeam";
+        }
+      }
+      this.setState({
+        dataSource: this.state.dataSource.cloneWithRows(newDs)
+      })
+      this.state.update = false;
     }else{
-      // console.log("nothing");
+      this.state.update= true;
     }
   }
 
-  getGames(){
+  shouldComponentUpdate(nextProps, nextState) {
+    return true;
+  }
+
+  getGames(fromLocal = true){
     console.log("network query");
-    ParseHelper.parseQuery('Games','Week',this.props.week,['Week','HomeTeam','AwayTeam'], (dataSource) =>{
-      ParseHelper.parseQuery('Selections','User',null,['Game','Selection'], (selections) =>{
+    ParseHelper.parseQuery('Games','Week',this.props.week, fromLocal, ['Week','HomeTeam','AwayTeam'], (dataSource) =>{
+      ParseHelper.parseQuery('Selections','User',null,false,['Game','Selection'], (selections) =>{
         dataSource.forEach((n,i)=>{
           var choice = _.result(_.find(selections,'Game', n.objectID),'Selection');
           if (choice) {
@@ -56,6 +73,7 @@ class Games extends React.Component{
           }
         });
         this.setState({
+          ds:dataSource,
           dataSource: this.state.dataSource.cloneWithRows(dataSource),
         });
       });
@@ -63,15 +81,19 @@ class Games extends React.Component{
   }
 
   componentDidMount(){
-    // console.log("componentDidMount");
-    this.getGames();
+    ParseHelper.updateSchedule((update)=>{
+      var needsUpdate = update != null 
+      this.getGames(!needsUpdate);
+    });
   }
   pressRow(rowData){
+    this.state.update = false;
     this.props.navigator.push({
       title: 'Game',
       component: Select,
       passProps:{
         gameData:rowData,
+        update:false
       }
     })
   }

@@ -10,24 +10,18 @@ var {
   StyleSheet,
   Text,
   View,
-  NavigatorIOS,
 } = React;
 
-var Weeks = require('./Weeks');
 
-class AppContainer extends React.Component{
-  
-  render() {
+var Scores = React.createClass({
+  render: function() {
     return (
-      <NavigatorIOS style = {{ flex:1}}
-        initialRoute = {{
-          component:Weeks,
-          title:"Weeks"
-        }}/>
-       
+      <View style = {styles.container}>
+      <Text>TODO:Scores</Text>
+      </View>
     );
   }
-};
+});
 
 var styles = StyleSheet.create({
   container: {
@@ -48,4 +42,4 @@ var styles = StyleSheet.create({
   },
 });
 
-module.exports = AppContainer
+module.exports = Scores

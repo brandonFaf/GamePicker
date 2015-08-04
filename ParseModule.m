@@ -14,7 +14,27 @@
 
 RCT_EXPORT_MODULE();
 
-RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsValue:(NSNumber*)value keys:(NSArray*)keys callback:(RCTResponseSenderBlock)callback) {
+
+RCT_EXPORT_METHOD(updateSchedule:(RCTResponseSenderBlock)callback){
+  PFQuery *query = [PFQuery queryWithClassName:@"Games"];
+  
+  [query whereKey:@"updated" equalTo:[NSNumber numberWithBool:YES]];
+  
+  [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error){
+    if (objects.count > 0) {
+      for (PFObject *obj in objects) {
+        obj[@"updated"] = [NSNumber numberWithBool:NO];
+        [obj saveInBackground];
+      }
+      callback(@[@"update"]);
+    }
+    else{
+      callback(@[]);
+    }
+  }];
+}
+
+RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsValue:(NSNumber*)value fromLocal:(BOOL)fromLocal keys:(NSArray*)keys callback:(RCTResponseSenderBlock)callback) {
   PFQuery *query = [PFQuery queryWithClassName:class];
   
   if (col != nil) {
@@ -23,6 +43,10 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
     }else{
       [query whereKey:col equalTo:value];
     }
+  }
+  
+  if (fromLocal) {
+    [query fromLocalDatastore];
   }
   
   [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error){
@@ -40,6 +64,9 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
         }
       }
       [returnArray addObject:buildingArray];
+    }
+    if (!fromLocal) {
+      [PFObject pinAllInBackground:objects];
     }
     callback(@[[returnArray copy]]);
     

@@ -19,7 +19,10 @@
   [Parse enableLocalDatastore];
   
   NSDictionary *keys = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Keys" ofType:@"plist"]];
-    
+  
+ 
+  [Parse enableLocalDatastore];
+  
   // Initialize Parse.
   [Parse setApplicationId:keys[@"parseApplicationId"]
                 clientKey:keys[@"parseClientKey"]];

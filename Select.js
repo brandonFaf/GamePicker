@@ -37,7 +37,7 @@ class Select extends Component{
         component: Games,
         passProps:{
           week: this.state.gameData.Week,
-          update:true,
+          update:selection != this.props.gameData.Selection,
           updatedSelection:selection,
           updatedGame:this.state.gameData.objectID,
         }

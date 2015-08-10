@@ -10,25 +10,53 @@ var {
   StyleSheet,
   Text,
   View,
+  ActivityIndicatorIOS,
 } = React;
 
+var ParseHelper = require('./ParseHelper');
 
-var Scores = React.createClass({
-  render: function() {
+class Scores extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {score:0, isLoading:true};
+
+  }
+
+  componentDidMount(){
+    ParseHelper.getAllScores((results)=>{
+      console.log(results);
+      this.setState({
+        score:results,
+        isLoading:false,
+      })
+    });
+  }
+  render() {
+    if (this.state.isLoading) {
+      return(
+        <View style = {styles.container}>
+          <ActivityIndicatorIOS
+            animating = {true}
+            size = 'small'
+            />
+        </View>
+        )
+    };
     return (
       <View style = {styles.container}>
-      <Text>TODO:Scores</Text>
+        {this.state.score.map(function(n){
+          return <Text>{n[0]}:{n[1]}</Text>
+        })}
       </View>
     );
   }
-});
+};
 
 var styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
   },
   welcome: {
     fontSize: 20,

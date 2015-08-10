@@ -29,16 +29,16 @@ class Login extends React.Component{
       showProgress:true
     }
     SimpleAuthService.authorize()
-      .then( info => {
+      .then( isAdmin => {
         AlertIOS.alert(
           'Complete',
-          'Welcome to Game Picker')
-        this.props.onLogin();
+          'Welcome to Game Picker' + isAdmin)
+        this.props.onLogin(isAdmin);
       })
       .catch(error=>{
         AlertIOS.alert(
           'error',
-          error.description)
+          "Be sure you are logged into Twitter in your settings")
         console.log(error);
       })
   }

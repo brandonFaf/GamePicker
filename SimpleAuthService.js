@@ -1,24 +1,29 @@
 'use strict'
 
-var AuthWrapper = require('NativeModules').AuthWrapper
 var AsyncStorage = require('react-native').AsyncStorage
 var ParseModule = require('NativeModules').ParseModule
+var _ = require('lodash');
+var userNameKey = 'userName';
+var isAdminKey = 'isAdmin';
+
 class SimpleAuthService {
 	authorize(){
 		return new Promise((resolve, reject) =>{
-			ParseModule.login((user)=>{
-				AsyncStorage.setItem('userName', user,(err)=>
+			ParseModule.login((user,isAdmin)=>{
+				AsyncStorage.multiSet([[userNameKey, user],
+									   [isAdminKey, isAdmin.toString()]],
+				(err)=>
 				{
 					if(err){
 						reject(err);
 					}
-					resolve(user);
+					resolve(isAdmin.toString());
 				})
 			})
 		})
 	}
 	getAuthInfo(cb){
-		AsyncStorage.getItem('userName', (err, val) =>{
+		AsyncStorage.multiGet([userNameKey, isAdminKey], (err, val) =>{
 			if(err){
 				return cb();
 			}
@@ -26,7 +31,11 @@ class SimpleAuthService {
 				return cb();
 			}
 			else{
-				return cb(null, val);
+				var zippedObject = _.zipObject(val);
+				if (!zippedObject[userNameKey]) {
+					return cb();
+				};
+				return cb(null, zippedObject[userNameKey], zippedObject[isAdminKey] == 'true'? true:false);
 			}
 		})
 	}

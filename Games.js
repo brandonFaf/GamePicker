@@ -29,7 +29,7 @@ class Games extends React.Component{
     });
     this.state = {
       dataSource: ds,
-      selectedTab:'quick',
+      selectedTab:'list',
       images:props.images
     }
   }
@@ -44,10 +44,11 @@ class Games extends React.Component{
           newDs[changed][prop] = this.state.ds[changed][prop];
         }
         else{
-          newDs[changed][prop] = this.state.ds[changed][prop] == "AwayTeam" ? "HomeTeam" : "AwayTeam";
+          newDs[changed][prop] = nextProps.updatedSelection;
         }
       }
       this.setState({
+        ds: newDs,
         dataSource: this.state.dataSource.cloneWithRows(newDs)
       })
       this.state.update = false;
@@ -56,13 +57,9 @@ class Games extends React.Component{
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return true;
-  }
-
   getGames(fromLocal = true){
     console.log("network query");
-    ParseHelper.parseQuery('Games','Week',this.props.week, fromLocal, ['Week','HomeTeam','AwayTeam'], (dataSource) =>{
+    ParseHelper.parseQuery('Games','Week',this.props.week, fromLocal, ['Week','HomeTeam','AwayTeam', 'Winner','GameTime'], (dataSource) =>{
       ParseHelper.parseQuery('Selections','User',null,false,['Game','Selection'], (selections) =>{
         dataSource.forEach((n,i)=>{
           var choice = _.result(_.find(selections,'Game', n.objectID),'Selection');
@@ -93,28 +90,27 @@ class Games extends React.Component{
       component: Select,
       passProps:{
         gameData:rowData,
-        update:false
+        update:false,
+        actAsAdmin:this.props.actAsAdmin
       }
     })
   }
   pressButton(){
-    this.props.navigator.push({
-      title:'Quick Select',
-      component:QuickSelect,
-      passProps:{
-      }
-    })
+    // ParseHelper.callCloudMethod();
   }
 
   renderRow(rowData){
+
+    console.log("GameTime " + rowData.GameTime);
+    let correct = rowData.Selection == rowData.Winner;
     return (
       <TouchableHighlight
         onPress={()=> this.pressRow(rowData)}
         underlayColor = '#ddd'>
-        <View style ={styles.row}>
+        <View style ={[styles.row,this.props.actAsAdmin&&{backgroundColor: '#333'}]}>
           <Text style={{fontSize:18}}>{rowData.AwayTeam} @ {rowData.HomeTeam} </Text>
           <View style={{flex:1}}>
-            <Text style={styles.dateText}>{rowData[rowData.Selection]}</Text>
+            <Text style={[styles.dateText, correct && styles.correct, (!correct && rowData.Winner != undefined) && styles.incorrect]}>{rowData[rowData.Selection]}</Text>
           </View>
         </View>
       </TouchableHighlight>
@@ -122,11 +118,13 @@ class Games extends React.Component{
     )
   }
   render(){
-    return (
-      <TabBarIOS >
+    var renderMeat;
+    renderMeat = <View/>
+    if (this.props.actAsAdmin) {
+    renderMeat = <TabBarIOS >
         <TabBarIOS.Item
           title='List'
-          style={styles.container}
+          style={[styles.container, {paddingTop:40}]}
           selected = {this.state.selectedTab == 'list'}
           onPress={()=>this.setState({selectedTab: 'list'})}>
           <ListView
@@ -135,9 +133,9 @@ class Games extends React.Component{
           </ListView>
         </TabBarIOS.Item>
         <TabBarIOS.Item
-          title='Quick'
-          selected = {this.state.selectedTab == 'quick'}
-          onPress={()=>this.setState({selectedTab: 'quick'})}>
+          title='Finalize'
+          selected = {this.state.selectedTab == 'Finalize'}
+          onPress={()=>this.setState({selectedTab: 'Finalize'})}>
           <View style={styles.todo}>
           <Text style = {styles.heading}>Click the button to start the quick select process</Text>
           <TouchableHighlight onPress= {() =>this.pressButton()} style={styles.button}>
@@ -146,6 +144,17 @@ class Games extends React.Component{
           </View>
         </TabBarIOS.Item>
       </TabBarIOS>
+    }
+    else{
+      renderMeat = <ListView
+            dataSource = {this.state.dataSource}
+            renderRow = {this.renderRow.bind(this)}>
+          </ListView>
+    }
+    return (
+      <View style = {styles.container}>
+      {renderMeat}
+      </View>
     );
   }
 }
@@ -153,7 +162,6 @@ var styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'flex-start',
-    paddingTop:40,
   },
   row:{
     flex:1,
@@ -167,6 +175,9 @@ var styles = StyleSheet.create({
     paddingTop:3,
     color:'#b5b5b5',
     textAlign:'right'
+  },
+  correct:{
+   color: 'green',
   },
   rowText:{
     flex:1,
@@ -190,6 +201,10 @@ var styles = StyleSheet.create({
     alignSelf:'center',
     justifyContent:'center'
   },
+  
+  incorrect:{
+    color:'red',
+  }
 }); 
 
 module.exports = Games

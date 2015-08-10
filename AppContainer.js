@@ -22,8 +22,11 @@ class AppContainer extends React.Component{
       <NavigatorIOS style = {{ flex:1}}
         initialRoute = {{
           component:Weeks,
-          title:"Weeks"
-        }}/>
+          title:"Weeks",
+          passProps:{
+             isAdmin:this.props.isAdmin
+          },
+          }}/>
        
     );
   }

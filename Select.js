@@ -13,14 +13,17 @@ var {
 
 var TeamImages = require('./TeamImages');
 var ParseHelper = require('./ParseHelper');
+var self
 class Select extends Component{
   constructor(props){
     super(props);
+    self = this;
     this.state = {
       gameData: props.gameData,
       images: TeamImages,
       awaySelected:props.gameData.Selection == 'AwayTeam',
       homeSelected:props.gameData.Selection == 'HomeTeam',
+      showError:false
     }
   }
 
@@ -30,24 +33,41 @@ class Select extends Component{
     }else{
       this.setState({awaySelected:false, homeSelected:true});
     }
-    ParseHelper.saveSelection(this.state.gameData.objectID, selection, ()=>{
-      var Games = require('./Games');
-      this.props.navigator.replacePreviousAndPop({
-        title: 'Week '+ this.state.gameData.Week,
+    if (this.props.actAsAdmin) {
+      ParseHelper.saveResult(this.state.gameData.objectID, selection, this.returnToGame);
+    }
+    else{
+      if(Date.now()< new Date(this.state.gameData.GameTime)){
+        ParseHelper.saveSelection(this.state.gameData.objectID, selection, this.returnToGame);
+      }
+      else{
+        this.setState({showError:true})
+      }
+    };
+  }
+
+  returnToGame(selection){
+    var Games = require('./Games');
+      self.props.navigator.replacePreviousAndPop({
+        title: 'Week '+ self.state.gameData.Week,
         component: Games,
         passProps:{
-          week: this.state.gameData.Week,
-          update:selection != this.props.gameData.Selection,
+          week: self.state.gameData.Week,
+          update:selection != self.props.gameData.Selection,
           updatedSelection:selection,
-          updatedGame:this.state.gameData.objectID,
+          updatedGame:self.state.gameData.objectID,
+          actAsAdmin:self.props.actAsAdmin
         }
-      })
-    })
-
+    });
   }
 
   render(){
+    var possibleError = <View/>
+    if (this.state.showError) {
+      possibleError =  <Text style = {styles.errorText}>There was an error when trying to save the selection. Is it past the start time?</Text>
+    };
     return(
+      <View style = {{flex:1, flexDirection:'column'}}>
       <View style = {styles.container}>
         <View style = {styles.teamContainer}>
           <TouchableHighlight
@@ -72,6 +92,10 @@ class Select extends Component{
           </TouchableHighlight>
           <Text style = {styles.teamText}>{this.state.gameData.HomeTeam}</Text>
         </View>
+      </View>
+      <View style = {{flex:1}}>
+        {possibleError}
+      </View>
       </View>
     )
   
@@ -103,6 +127,14 @@ var styles = StyleSheet.create({
   selected:{
     borderWidth:3,
     borderColor:"#a7bc32"
+  },
+  errorText:{
+    borderWidth:1,
+    margin:10,
+    padding:5,
+    borderRadius:10,
+    color:'red',
+    borderColor:'red'
   }
 });
 module.exports = Select; 

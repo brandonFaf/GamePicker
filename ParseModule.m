@@ -59,6 +59,10 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
         if ([obj[key] isKindOfClass:[PFObject class]]) {
           [buildingArray addObject:((PFObject*)obj[key]).objectId];
         }
+        else if([obj[key] isKindOfClass:[NSDate class]]){
+          NSString *date = [NSDateFormatter localizedStringFromDate:((NSDate*)obj[key]) dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
+          [buildingArray addObject:date];
+        }
         else{
           [buildingArray addObject:obj[key]];
         }
@@ -68,6 +72,7 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
     if (!fromLocal) {
       [PFObject pinAllInBackground:objects];
     }
+    
     callback(@[[returnArray copy]]);
     
   }];
@@ -82,7 +87,8 @@ RCT_REMAP_METHOD(login,callback:(RCTResponseSenderBlock)callback){
       NSLog(@"User signed up and logged in with Twitter!");
     } else {
       NSLog(@"User logged in with Twitter! \n %@", user);
-      callback(@[user.username]);
+            
+      callback(@[user.username, user[@"isAdmin"]]);
     }
   }];
 }
@@ -118,5 +124,37 @@ RCT_EXPORT_METHOD(saveSelection:(NSString*)objectId selection:(NSString*)selecti
       
     }];
   }];
+}
+RCT_EXPORT_METHOD(saveResult:(NSString*)objectId winner:(NSString *)winner callback:(RCTResponseSenderBlock)callback){
+  PFQuery* query = [PFQuery queryWithClassName:@"Games"];
+  [query getObjectInBackgroundWithId:objectId block:^(PFObject* object, NSError *error){
+    object[@"Winner"] = winner;
+    [object saveInBackgroundWithBlock:^(BOOL succeed, NSError* error){
+      if (succeed) {
+        NSLog(@"Yay");
+        callback(@[]);
+      }
+      else{
+        NSLog(@"BOO");
+      }
+    }];
+  }];
+}
+RCT_EXPORT_METHOD(getScoreForCurrentUser:(NSNumber*)week callback:(RCTResponseSenderBlock)callback){
+  [[self callGetScoreForUser:[PFUser currentUser].objectId week:week] continueWithSuccessBlock:^id(BFTask* task){
+    NSLog(@"%@",task.result);
+    callback(@[task.result]);
+    return nil;
+  }];
+  
+}
+RCT_EXPORT_METHOD(getAllScores:(RCTResponseSenderBlock)callback){
+  [PFCloud callFunctionInBackground:@"getAllScores" withParameters:@{@"week":[NSNumber numberWithInt:0]} block:^(NSArray* result, NSError* error){
+    callback(result);
+  }];
+}
+
+-(BFTask *)callGetScoreForUser:(NSString*)user week:(NSNumber*)week{
+  return [PFCloud callFunctionInBackground:@"getScoreForUser" withParameters:@{@"user":user,@"week":week}];
 }
 @end

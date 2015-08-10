@@ -19,11 +19,12 @@ var Login = require('./Login');
 
 var GamePicker = React.createClass({
   componentDidMount:function(){
-    SimpleAuthService.getAuthInfo((err,username)=>{
+    SimpleAuthService.getAuthInfo((err,username, isAdmin)=>{
         this.setState({
           checkingAuth:false,
           isLoggedIn: username != null,
-          username:username
+          username:username,
+          isAdmin:isAdmin
       });
     })
   },
@@ -40,7 +41,7 @@ var GamePicker = React.createClass({
     }
     if(this.state.isLoggedIn){
       return (
-        <AppContainer />
+        <AppContainer isAdmin = {this.state.isAdmin} />
       );
     }
     else{
@@ -49,8 +50,8 @@ var GamePicker = React.createClass({
       )
     }
   },
-  onLogin:function(){
-    this.setState({isLoggedIn:true})
+  onLogin:function(isAdmin){
+    this.setState({isLoggedIn:true, isAdmin:isAdmin})
   },
   getInitialState:function(){
     return{

@@ -12,8 +12,12 @@ var {
   View,
   ListView,
   TouchableHighlight,
-  TabBarIOS
+  TabBarIOS,
+  ActivityIndicatorIOS,
 } = React;
+
+var months = ["Jan","Feb","Mar","April","May","June","July","Aug","Sept","Oct","Nov","Dec"];
+var days = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
 
 var Select = require('./Select');
 var QuickSelect = require('./QuickSelect');
@@ -24,13 +28,25 @@ var _ = require('lodash')
 class Games extends React.Component{
   constructor(props){
     super(props);
+    var getSectionData = (dataBlob, sectionID) => {
+        return dataBlob[sectionID];
+    }
+
+    var getRowData = (dataBlob, sectionID, rowID) => {
+        return dataBlob[sectionID + ':' + rowID];
+    }
     var ds = new ListView.DataSource({
-      rowHasChanged: (r1, r2) => r1 != r2
+      rowHasChanged: (r1, r2) => r1 != r2,
+      sectionHeaderHasChanged: (s1, s2) => s1 != s2,
+      getRowData: getRowData,
+      getSectionData: getSectionData,
     });
     this.state = {
       dataSource: ds,
       selectedTab:'list',
-      images:props.images
+      images:props.images,
+      loading:true,
+      showError:false,
     }
   }
 
@@ -59,9 +75,11 @@ class Games extends React.Component{
 
   getGames(fromLocal = true){
     console.log("network query");
-    ParseHelper.parseQuery('Games','Week',this.props.week, fromLocal, ['Week','HomeTeam','AwayTeam', 'Winner','GameTime'], (dataSource) =>{
+    var columns = ['Week','HomeTeam','AwayTeam', 'Winner','Date','Time'];
+    ParseHelper.parseQuery('Games','Week',this.props.week, fromLocal, columns, (dataSource) =>{
       ParseHelper.parseQuery('Selections','User',null,false,['Game','Selection'], (selections) =>{
         dataSource.forEach((n,i)=>{
+          n.GameTime = new Date(n.Date + ' ' + n.Time);
           var choice = _.result(_.find(selections,'Game', n.objectID),'Selection');
           if (choice) {
             n.Selection = choice;
@@ -69,9 +87,34 @@ class Games extends React.Component{
             n.Selection = "";
           }
         });
+        dataSource.sort(function(a,b){
+          return new Date(a.GameTime) - new Date(b.GameTime)
+        }) 
+        var dates = _.uniq(dataSource, true, function(n){
+          return n.GameTime.getTime();
+        });
+        var sectionIds = [];
+        var rowIds =[];
+        var dataBlob = {};
+        dates.forEach((n,i)=>{ 
+            sectionIds.push(i);
+            var afternoon = n.GameTime.getHours() <12 ? "AM" : "PM";
+            dataBlob[i] = days[n.GameTime.getDay()] + " " + months[n.GameTime.getMonth()]+" " + n.GameTime.getDate() + " " + n.GameTime.getHours()%12 + ":"+("0"+n.GameTime.getMinutes()).slice(-2)+" "+ afternoon;
+
+            var games = dataSource.filter(function(obj){
+              return obj.GameTime.getTime() == n.GameTime.getTime();
+            })
+            rowIds[i] = [];
+            games.forEach((m,j)=>{
+              rowIds[i].push(m.objectID);
+              dataBlob[i+":"+m.objectID] = m
+            })
+          
+        })
         this.setState({
+          loading:false,
           ds:dataSource,
-          dataSource: this.state.dataSource.cloneWithRows(dataSource),
+          dataSource: this.state.dataSource.cloneWithRowsAndSections(dataBlob,sectionIds,rowIds),
         });
       });
     });
@@ -117,7 +160,31 @@ class Games extends React.Component{
 
     )
   }
+  renderSectionHeader(sectionData, sectionID) {
+        return (
+            <View style={styles.section}>
+                <Text style={styles.text}>{sectionData}</Text>
+            </View>
+        ); 
+    }
   render(){
+    if (this.state.loading) {
+      return(
+        <View style = {styles.loadingContainer}>
+          <ActivityIndicatorIOS
+            size = 'large'
+            animated = {true}
+          />
+        </View>
+      )
+    }
+     if (this.state.showError) {
+      return(
+        <View style = {styles.loadingContainer}>
+          <Text style = {styles.errorText}>There was an error when trying to retrieve the games for this week. Do you have internet?</Text>
+        </View>
+      )
+    }
     var renderMeat;
     renderMeat = <View/>
     if (this.props.actAsAdmin) {
@@ -148,7 +215,9 @@ class Games extends React.Component{
     else{
       renderMeat = <ListView
             dataSource = {this.state.dataSource}
-            renderRow = {this.renderRow.bind(this)}>
+            renderRow = {this.renderRow.bind(this)}
+            renderSectionHeader = {this.renderSectionHeader.bind(this)}>
+
           </ListView>
     }
     return (
@@ -169,6 +238,11 @@ var styles = StyleSheet.create({
     padding:18,
     borderBottomWidth: 1,
     borderColor: '#d7d7d7',
+  },
+  loadingContainer:{
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center'
   },
   dateText:{
     fontSize:15,
@@ -201,9 +275,24 @@ var styles = StyleSheet.create({
     alignSelf:'center',
     justifyContent:'center'
   },
-  
   incorrect:{
     color:'red',
+  },
+  section: {
+    flex:1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    padding: 6,
+    backgroundColor: '#ddd'
+    },
+  errorText:{
+    borderWidth:1,
+    margin:10,
+    padding:5,
+    borderRadius:10,
+    color:'red',
+    borderColor:'red'
   }
 }); 
 

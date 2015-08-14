@@ -19,22 +19,27 @@ RCT_EXPORT_METHOD(updateSchedule:(RCTResponseSenderBlock)callback){
   PFQuery *query = [PFQuery queryWithClassName:@"Games"];
   
   [query whereKey:@"updated" equalTo:[NSNumber numberWithBool:YES]];
-  
   [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error){
-    if (objects.count > 0) {
-      for (PFObject *obj in objects) {
-        obj[@"updated"] = [NSNumber numberWithBool:NO];
-        [obj saveInBackground];
-      }
-      callback(@[@"update"]);
-    }
-    else{
+    if (error) {
       callback(@[]);
     }
+      else{
+      if (objects.count > 0) {
+        for (PFObject *obj in objects) {
+          obj[@"updated"] = [NSNumber numberWithBool:NO];
+          [obj saveInBackground];
+        }
+        callback(@[@"update"]);
+      }
+      else{
+        callback(@[]);
+      }
+    }
   }];
+    
 }
 
-RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsValue:(NSNumber*)value fromLocal:(BOOL)fromLocal keys:(NSArray*)keys callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsValue:(NSNumber*)value fromLocal:(BOOL)fromLocal keys:(NSArray*)keys callback:(RCTResponseSenderBlock)callback ) {
   PFQuery *query = [PFQuery queryWithClassName:class];
   
   if (col != nil) {
@@ -46,10 +51,11 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
   }
   
   if (fromLocal) {
-    [query fromLocalDatastore];
+    //[query fromLocalDatastore];
   }
   
   [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error){
+    
     NSMutableArray *returnArray = [[NSMutableArray alloc]init];
 
     for (PFObject* obj in objects) {
@@ -59,11 +65,15 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
         if ([obj[key] isKindOfClass:[PFObject class]]) {
           [buildingArray addObject:((PFObject*)obj[key]).objectId];
         }
-        else if([obj[key] isKindOfClass:[NSDate class]]){
-          NSString *date = [NSDateFormatter localizedStringFromDate:((NSDate*)obj[key]) dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
-          [buildingArray addObject:date];
+//        else if([obj[key] isKindOfClass:[NSDate class]]){
+//          NSString *date = [NSDateFormatter localizedStringFromDate:((NSDate*)obj[key]) dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterShortStyle];
+//          [buildingArray addObject:date];
+//        }
+        else if(!(obj[key])){
+          [buildingArray addObject:[NSNull null]];
         }
         else{
+          NSLog(@"%@",obj[key]);
           [buildingArray addObject:obj[key]];
         }
       }
@@ -140,10 +150,17 @@ RCT_EXPORT_METHOD(saveResult:(NSString*)objectId winner:(NSString *)winner callb
     }];
   }];
 }
-RCT_EXPORT_METHOD(getScoreForCurrentUser:(NSNumber*)week callback:(RCTResponseSenderBlock)callback){
-  [[self callGetScoreForUser:[PFUser currentUser].objectId week:week] continueWithSuccessBlock:^id(BFTask* task){
+
+RCT_EXPORT_METHOD(getScoreForCurrentUser:(NSNumber*)week errorCB:(RCTResponseSenderBlock)errorCB callback:(RCTResponseSenderBlock)callback){
+  [[self callGetScoreForUser:[PFUser currentUser].objectId week:week] continueWithBlock:^id(BFTask* task){
+
     NSLog(@"%@",task.result);
-    callback(@[task.result]);
+    if (task.error) {
+      errorCB(@[]);
+    }
+    else{
+      callback(@[task.result]);
+    }
     return nil;
   }];
   

@@ -21,7 +21,7 @@ class ParseHelper {
 		ParseModule.saveResult(objectID,selection,cb(selection));
 	}
 	getScoreForCurrentUser(week,cb){
-		ParseModule.getScoreForCurrentUser(week, result=>cb(result));
+		ParseModule.getScoreForCurrentUser(week, ()=>cb(1), result=>cb(result));
 	}
 	getAllScores(cb){
 		ParseModule.getAllScores((...results)=>cb(results));

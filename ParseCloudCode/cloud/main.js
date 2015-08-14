@@ -65,3 +65,4 @@ Parse.Cloud.define("getAllScores", function(request, response) {
 		response.success(scores);
 	});
 });
+

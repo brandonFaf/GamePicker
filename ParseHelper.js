@@ -11,8 +11,10 @@ class ParseHelper {
 			cb(returnArray);
 		});
 	}
-	saveSelection(objectID, selection, cb){
-		ParseModule.saveSelection(objectID,selection, ()=>cb(selection))
+	saveSelection(objectID, selectionId, selection, isDouble, cb){
+		ParseModule.saveSelection(objectID, selectionId, selection, isDouble, (savedId)=>{
+			cb(savedId,selection)
+		})
 	}
 	updateSchedule(cb){
 		ParseModule.updateSchedule((result)=>cb(result));

@@ -14,6 +14,8 @@ var {
   TouchableHighlight,
   TabBarIOS,
   ActivityIndicatorIOS,
+  ScrollView,
+  Image,
 } = React;
 
 var months = ["Jan","Feb","Mar","April","May","June","July","Aug","Sept","Oct","Nov","Dec"];
@@ -63,10 +65,12 @@ class Games extends React.Component{
           newDs[changed][prop] = nextProps.updatedSelection;
         }
       }
-      this.setState({
-        ds: newDs,
-        dataSource: this.state.dataSource.cloneWithRows(newDs)
-      })
+      newDs[changed].selectionId = nextProps.selectionId;
+      this.setDataSource(newDs);
+      // this.setState({
+      //   ds: newDs,
+      //   dataSource: this.state.dataSource.cloneWithRows(newDs)
+      // })
       this.state.update = false;
     }else{
       this.state.update= true;
@@ -77,50 +81,60 @@ class Games extends React.Component{
     console.log("network query");
     var columns = ['Week','HomeTeam','AwayTeam', 'Winner','Date','Time'];
     ParseHelper.parseQuery('Games','Week',this.props.week, fromLocal, columns, (dataSource) =>{
-      ParseHelper.parseQuery('Selections','User',null,false,['Game','Selection'], (selections) =>{
+      ParseHelper.parseQuery('Selections','User',null,false,['Game','Selection','isDouble'], (selections) =>{
+        // var selections = [];
         dataSource.forEach((n,i)=>{
           n.GameTime = new Date(n.Date + ' ' + n.Time);
-          var choice = _.result(_.find(selections,'Game', n.objectID),'Selection');
+          var choice = _.find(selections,'Game', n.objectID);
           if (choice) {
-            n.Selection = choice;
+            n.Selection = choice.Selection;
+            n.SelectionId = choice.objectID;
+            n.isDouble = choice.isDouble;
           }else{
             n.Selection = "";
+            n.SelectionId = "";
+            n.isDouble = false;
           }
         });
-        dataSource.sort(function(a,b){
-          return new Date(a.GameTime) - new Date(b.GameTime)
-        }) 
-        var dates = _.uniq(dataSource, true, function(n){
-          return n.GameTime.getTime();
-        });
-        var sectionIds = [];
-        var rowIds =[];
-        var dataBlob = {};
-        dates.forEach((n,i)=>{ 
-            sectionIds.push(i);
-            var afternoon = n.GameTime.getHours() <12 ? "AM" : "PM";
-            dataBlob[i] = days[n.GameTime.getDay()] + " " + months[n.GameTime.getMonth()]+" " + n.GameTime.getDate() + " " + n.GameTime.getHours()%12 + ":"+("0"+n.GameTime.getMinutes()).slice(-2)+" "+ afternoon;
-
-            var games = dataSource.filter(function(obj){
-              return obj.GameTime.getTime() == n.GameTime.getTime();
-            })
-            rowIds[i] = [];
-            games.forEach((m,j)=>{
-              rowIds[i].push(m.objectID);
-              dataBlob[i+":"+m.objectID] = m
-            })
-          
-        })
-        this.setState({
-          loading:false,
-          ds:dataSource,
-          dataSource: this.state.dataSource.cloneWithRowsAndSections(dataBlob,sectionIds,rowIds),
-        });
+        this.setDataSource(dataSource);
       });
     });
   }
 
+  setDataSource(dataSource){
+    dataSource.sort(function(a,b){
+      return new Date(a.GameTime) - new Date(b.GameTime)
+    }) 
+    var dates = _.uniq(dataSource, true, function(n){
+      return n.GameTime.getTime();
+    });
+    var sectionIds = [];
+    var rowIds =[];
+    var dataBlob = {};
+    dates.forEach((n,i)=>{ 
+        sectionIds.push(i);
+        var afternoon = n.GameTime.getHours() <12 ? "AM" : "PM";
+        dataBlob[i] = days[n.GameTime.getDay()] + " " + months[n.GameTime.getMonth()]+" " + n.GameTime.getDate() + " " + n.GameTime.getHours()%12 + ":"+("0"+n.GameTime.getMinutes()).slice(-2)+" "+ afternoon;
+
+        var games = dataSource.filter(function(obj){
+          return obj.GameTime.getTime() == n.GameTime.getTime();
+        })
+        rowIds[i] = [];
+        games.forEach((m,j)=>{
+          rowIds[i].push(m.objectID);
+          dataBlob[i+":"+m.objectID] = m
+        })
+      
+    })
+    this.setState({
+      loading:false,
+      ds:dataSource,
+      dataSource: this.state.dataSource.cloneWithRowsAndSections(dataBlob,sectionIds,rowIds),
+    });
+  }
+
   componentDidMount(){
+    // this.getGames(true);
     ParseHelper.updateSchedule((update)=>{
       var needsUpdate = update != null 
       this.getGames(!needsUpdate);
@@ -143,7 +157,10 @@ class Games extends React.Component{
   }
 
   renderRow(rowData){
-
+    var double = <View/>
+    if (rowData.isDouble) {
+      double = <Image source = {require("image!StarSelected")} style = {{width:20, height:20}}/>
+    };
     console.log("GameTime " + rowData.GameTime);
     let correct = rowData.Selection == rowData.Winner;
     return (
@@ -152,12 +169,12 @@ class Games extends React.Component{
         underlayColor = '#ddd'>
         <View style ={[styles.row,this.props.actAsAdmin&&{backgroundColor: '#333'}]}>
           <Text style={{fontSize:18}}>{rowData.AwayTeam} @ {rowData.HomeTeam} </Text>
-          <View style={{flex:1}}>
+          <View style={{flex:1, flexDirection:'row'}}>
+            {double}
             <Text style={[styles.dateText, correct && styles.correct, (!correct && rowData.Winner != undefined) && styles.incorrect]}>{rowData[rowData.Selection]}</Text>
           </View>
         </View>
       </TouchableHighlight>
-
     )
   }
   renderSectionHeader(sectionData, sectionID) {
@@ -245,10 +262,11 @@ var styles = StyleSheet.create({
     alignItems:'center'
   },
   dateText:{
+    flex:1,
     fontSize:15,
     paddingTop:3,
     color:'#b5b5b5',
-    textAlign:'right'
+    textAlign:'right',
   },
   correct:{
    color: 'green',
@@ -293,7 +311,7 @@ var styles = StyleSheet.create({
     borderRadius:10,
     color:'red',
     borderColor:'red'
-  }
+  },
 }); 
 
 module.exports = Games

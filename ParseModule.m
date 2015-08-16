@@ -55,6 +55,10 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
   }
   
   [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error){
+//    if (objects.count <10) {
+//      
+//      [PFObject unpinAllInBackground:objects];
+//    }
     
     NSMutableArray *returnArray = [[NSMutableArray alloc]init];
 
@@ -82,7 +86,7 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
     if (!fromLocal) {
       [PFObject pinAllInBackground:objects];
     }
-    
+   
     callback(@[[returnArray copy]]);
     
   }];
@@ -103,29 +107,31 @@ RCT_REMAP_METHOD(login,callback:(RCTResponseSenderBlock)callback){
   }];
 }
 
-RCT_EXPORT_METHOD(saveSelection:(NSString*)objectId selection:(NSString*)selection callback:(RCTResponseSenderBlock)callback){
+RCT_EXPORT_METHOD(saveSelection:(NSString*)objectId selectionId:(NSString*)selectionId selection:(NSString*)selection isDouble:(BOOL)isDouble callback:(RCTResponseSenderBlock)callback){
   PFQuery* query = [PFQuery queryWithClassName:@"Selections"];
+  //[query fromLocalDatastore];
   
-  PFUser* user = [PFUser currentUser];
-  PFObject* game = [PFObject objectWithoutDataWithClassName:@"Games" objectId:objectId];
-  [query whereKey:@"Game" equalTo:game];
-  [query whereKey:@"User" equalTo:user];
-  [query findObjectsInBackgroundWithBlock:^(NSArray* objects, NSError *error){
+  [query getObjectInBackgroundWithId:selectionId block:^(PFObject* object, NSError *error){
 
     PFObject* choice = [PFObject objectWithClassName:@"Selections"];
 
-    if (objects.count > 0) {
-      choice = objects[0];
+    if (object) {
+      choice = object;
     }
     else{
+      PFUser* user = [PFUser currentUser];
+      PFObject* game = [PFObject objectWithoutDataWithClassName:@"Games" objectId:objectId];
       choice[@"Game"] = game;
       choice[@"User"] = user;
     }
     choice[@"Selection"] = selection;
+    choice[@"isDouble"] = [NSNumber numberWithBool:isDouble];
+    
     [choice saveInBackgroundWithBlock:^(BOOL succeed, NSError* error){
+//      [choice pinInBackgroundWithBlock:^(BOOL succeed, NSError* error){
       if (succeed) {
-        NSLog(@"Yay");
-        callback(@[]);
+        NSLog(@"Yay %@", choice.objectId );
+        callback(@[choice.objectId]);
       }
       else{
         NSLog(@"BOO");

@@ -23,7 +23,8 @@ class Select extends Component{
       images: TeamImages,
       awaySelected:props.gameData.Selection == 'AwayTeam',
       homeSelected:props.gameData.Selection == 'HomeTeam',
-      showError:false
+      showError:false,
+      isDouble:props.gameData.isDouble,
     }
   }
 
@@ -34,11 +35,11 @@ class Select extends Component{
       this.setState({awaySelected:false, homeSelected:true});
     }
     if (this.props.actAsAdmin) {
-      ParseHelper.saveResult(this.state.gameData.objectID, selection, this.returnToGame);
+      ParseHelper.saveResult(this.state.gameDate.objectID, selection, this.returnToGame);
     }
     else{
       if(Date.now()< new Date(this.state.gameData.GameTime)){
-        ParseHelper.saveSelection(this.state.gameData.objectID, selection, this.returnToGame);
+        ParseHelper.saveSelection(this.state.gameData.objectID, this.state.gameData.selectionId, selection, this.state.isDouble, this.returnToGame);
       }
       else{
         this.setState({showError:true})
@@ -46,28 +47,57 @@ class Select extends Component{
     };
   }
 
-  returnToGame(selection){
+  returnToGame(savedId, selection){
     var Games = require('./Games');
       self.props.navigator.replacePreviousAndPop({
         title: 'Week '+ self.state.gameData.Week,
         component: Games,
         passProps:{
           week: self.state.gameData.Week,
-          update:selection != self.props.gameData.Selection,
+          update:(selection != self.props.gameData.Selection||self.state.isDouble != self.state.gameData.isDouble),
           updatedSelection:selection,
           updatedGame:self.state.gameData.objectID,
+          selectionId:savedId,
           actAsAdmin:self.props.actAsAdmin
         }
     });
   }
-
+  doDouble(){
+    if (!this.state.awaySelected && !this.state.homeSelected) {
+      this.setState({
+        showDoubleError:true,
+      })
+    }
+    else{
+      var selection = this.state.awaySelected ? "AwayTeam" : "HomeTeam"
+      if(Date.now()< new Date(this.state.gameData.GameTime)){
+        ParseHelper.saveSelection(this.state.gameData.objectID, this.state.gameData.selectionId, selection, !this.state.isDouble, this.returnToGame);
+        this.setState({
+          isDouble:!this.state.isDouble,
+        })
+      }
+      else{
+        this.setState({showError:true})
+      }
+    }
+  }
   render(){
     var possibleError = <View/>
     if (this.state.showError) {
       possibleError =  <Text style = {styles.errorText}>There was an error when trying to save the selection. Is it past the start time?</Text>
     };
+    if(this.state.showDoubleError){
+      possibleError = <Text style = {styles.errorText}>Please select who you think will win before selecting this as your double</Text>
+    }
+    var image;
+    if (this.state.isDouble) {
+      image = require('image!StarSelected')
+    }
+    else{
+      image = require('image!Star')
+    };
     return(
-      <View style = {{flex:1, flexDirection:'column'}}>
+      <View style = {{flex:1,flexDirection:'column'}}>
       <View style = {styles.container}>
         <View style = {styles.teamContainer}>
           <TouchableHighlight
@@ -93,7 +123,13 @@ class Select extends Component{
           <Text style = {styles.teamText}>{this.state.gameData.HomeTeam}</Text>
         </View>
       </View>
-      <View style = {{flex:1}}>
+      <View style = {{flex:2.5,alignItems:'center'}}>
+        <TouchableHighlight
+          onPress = {() =>this.doDouble()}
+          underlayColor = '#fff'>
+          <Image source = {image} style = {{ height:60, width:60}}/>
+        </TouchableHighlight>
+          <Text>Double</Text>
         {possibleError}
       </View>
       </View>

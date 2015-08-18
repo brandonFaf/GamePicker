@@ -39,7 +39,7 @@ class Select extends Component{
     }
     else{
       if(Date.now()< new Date(this.state.gameData.GameTime)){
-        ParseHelper.saveSelection(this.state.gameData.objectID, this.state.gameData.selectionId, selection, this.state.isDouble, this.returnToGame);
+        ParseHelper.saveSelection(this.state.gameData.objectID, this.state.gameData.SelectionId, selection, this.state.isDouble, this.returnToGame);
       }
       else{
         this.setState({showError:true})
@@ -58,7 +58,8 @@ class Select extends Component{
           updatedSelection:selection,
           updatedGame:self.state.gameData.objectID,
           selectionId:savedId,
-          actAsAdmin:self.props.actAsAdmin
+          actAsAdmin:self.props.actAsAdmin,
+          isDouble:self.state.isDouble
         }
     });
   }
@@ -71,10 +72,27 @@ class Select extends Component{
     else{
       var selection = this.state.awaySelected ? "AwayTeam" : "HomeTeam"
       if(Date.now()< new Date(this.state.gameData.GameTime)){
-        ParseHelper.saveSelection(this.state.gameData.objectID, this.state.gameData.selectionId, selection, !this.state.isDouble, this.returnToGame);
-        this.setState({
-          isDouble:!this.state.isDouble,
-        })
+        if (!this.state.isDouble) {
+          ParseHelper.checkIfDoubleIsLegal(this.state.gameData[selection],(cont)=>{
+            if (cont) {
+              ParseHelper.changeDoubleArray(true,this.state.gameData[selection],()=>{
+                ParseHelper.setDouble(this.state.gameData.Week, this.state.gameData.SelectionId,()=>{
+                  self.state.isDouble=!this.state.isDouble;
+                  this.returnToGame(this.state.gameData.SelectionId,selection);
+                });
+              })
+            }
+            else{
+              this.setState({showError:true})
+            };
+          })
+        }
+        else{
+          ParseHelper.setDouble(this.state.gameData.Week, "", () => {
+            self.state.isDouble = !this.state.isDouble
+            this.returnToGame(this.state.gameData.SelectionId, selection);
+          })
+        }
       }
       else{
         this.setState({showError:true})

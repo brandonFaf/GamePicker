@@ -23,6 +23,9 @@ Parse.Cloud.define("getScoreForUser", function(request, response) {
 				var selection = n.get("Selection");
 				if (winner == selection) {
 					count++
+					if (n.get("isDouble")) {
+						count++;
+					};
 				};
 			})
 			response.success(count);
@@ -54,6 +57,9 @@ Parse.Cloud.define("getAllScores", function(request, response) {
 						var selection = n.get("Selection");
 						if (winner == selection) {
 							count++
+							if (n.get("isDouble")) {
+								count++;
+							};
 						};
 					})
 					scores.push([result.get("username"),count]);
@@ -65,4 +71,32 @@ Parse.Cloud.define("getAllScores", function(request, response) {
 		response.success(scores);
 	});
 });
+Parse.Cloud.define("changeDoubleArray", function(request, response){
+	userQuery = new Parse.Query(Parse.User);
+	userQuery.equalTo("objectId",request.params.userId);
+	Parse.Cloud.useMasterKey();
+	userQuery.find(function(result){
+		var user = result[0];
+		var doubles = user.get("doubles");
+		doubles = doubles ? doubles : [];
+		var message = 'nothing was done'
+		if (request.params.shouldAdd) {
+			doubles.push(request.params.team)
+			message = 'added ' + request.params.team;
+
+		}
+		else{
+			if (doubles.indexOf(request.params.team) != -1) {
+				doubles.splice(doubles.indexOf(request.params.team),1);
+				message = 'removed ' + request.params.team;
+			};
+		}
+		user.set('doubles',doubles);
+		user.save(null,{
+			success:function(user){
+				response.success(message);
+			}
+		})
+	})	
+})
 

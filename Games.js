@@ -65,7 +65,25 @@ class Games extends React.Component{
           newDs[changed][prop] = nextProps.updatedSelection;
         }
       }
-      newDs[changed].selectionId = nextProps.selectionId;
+      newDs[changed].SelectionId = nextProps.selectionId;
+      newDs[changed].isDouble = nextProps.isDouble;
+      if (nextProps.isDouble) {
+        var otherDouble = _.findIndex(this.state.ds,'isDouble', true);
+        if (otherDouble == changed && otherDouble != -1) {
+          otherDouble = _findLastIndex(this.state.ds,'isDouble',true);
+        };
+        if (otherDouble != changed && otherDouble != -1) {
+          newDs[otherDouble] = {};
+          for(var prop in this.state.ds[otherDouble]){
+            if(prop != "isDouble"){
+              newDs[otherDouble][prop] = this.state.ds[otherDouble][prop];
+            }
+            else{
+              newDs[otherDouble][prop] = false;
+            }
+          }
+        };
+      };
       this.setDataSource(newDs);
       // this.setState({
       //   ds: newDs,

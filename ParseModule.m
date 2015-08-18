@@ -177,6 +177,58 @@ RCT_EXPORT_METHOD(getAllScores:(RCTResponseSenderBlock)callback){
   }];
 }
 
+RCT_EXPORT_METHOD(checkIfDoubleIsLegal:(NSString*)teamName callback:(RCTResponseSenderBlock)callback){
+  PFQuery *arrayQuery = [PFUser query];
+  [arrayQuery getObjectInBackgroundWithId:[PFUser currentUser].objectId block:^(PFObject *object, NSError* error){
+    NSMutableArray* doubleArray;
+    if(object[@"doubles"]){
+      doubleArray = object[@"doubles"];
+    }
+    else{
+      doubleArray  = [[NSMutableArray alloc]init];
+    }
+    if ([doubleArray indexOfObject:teamName] == NSNotFound) {
+      callback(@[@"continue"]);
+    }
+    else{
+      callback(@[]);
+    }
+  }];
+}
+
+RCT_EXPORT_METHOD(setDouble:(NSNumber*)week selectionId:(NSString *)selectionId callback:(RCTResponseSenderBlock)callback){
+  PFQuery *inner = [PFQuery queryWithClassName:@"Games"];
+  [inner whereKey:@"Week" equalTo:week];
+  PFQuery *outer = [PFQuery queryWithClassName:@"Selections"];
+  [outer whereKey:@"Game" matchesQuery:inner];
+  [outer includeKey:@"Game"];
+  [outer findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error){
+    NSLog(@"objects %@", objects);
+    for (PFObject *obj in objects) {
+      NSLog(@"objID = %@", obj.objectId);
+      NSLog(@"%@",obj[@"isDouble"]);
+      if ([obj.objectId isEqualToString:selectionId]) {
+        obj[@"isDouble"] = [NSNumber numberWithBool:YES];
+      }
+      else if([obj[@"isDouble"] isEqualToNumber:[NSNumber numberWithBool:YES] ]){
+        obj[@"isDouble"] = [NSNumber numberWithBool:NO];
+        NSString *selection = obj[@"Selection"];
+        NSLog(@"%@ %@",selection, obj[@"Game"][selection]);
+        [PFCloud callFunctionInBackground:@"changeDoubleArray" withParameters:@{@"userId":[PFUser currentUser].objectId,@"team":obj[@"Game"][selection] ,@"shouldAdd":[NSNumber numberWithBool:NO]}];
+      }
+    }
+    [PFObject saveAll:objects];
+    callback(@[]);
+  }];
+  
+}
+
+RCT_EXPORT_METHOD(changeDoubleArray:(BOOL *)shouldAdd teamName:(NSString*)teamName callback:(RCTResponseSenderBlock)callback){
+  [PFCloud callFunctionInBackground:@"changeDoubleArray" withParameters:@{@"userId":[PFUser currentUser].objectId,@"team":teamName, @"shouldAdd":[NSNumber numberWithBool:shouldAdd]} block:^(NSString* result, NSError* error){
+    callback(@[result]);
+  }];
+}
+
 -(BFTask *)callGetScoreForUser:(NSString*)user week:(NSNumber*)week{
   return [PFCloud callFunctionInBackground:@"getScoreForUser" withParameters:@{@"user":user,@"week":week}];
 }

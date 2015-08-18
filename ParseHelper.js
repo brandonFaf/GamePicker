@@ -28,5 +28,14 @@ class ParseHelper {
 	getAllScores(cb){
 		ParseModule.getAllScores((...results)=>cb(results));
 	}
+	checkIfDoubleIsLegal(teamName,cb){
+		ParseModule.checkIfDoubleIsLegal(teamName,cont=>cb(cont));
+	}
+	changeDoubleArray(shouldAdd,teamName,cb){
+		ParseModule.changeDoubleArray(shouldAdd,teamName, (result)=>cb())
+	}
+	setDouble(week,sectionId, cb){
+		ParseModule.setDouble(week,sectionId,(result)=>cb());
+	}
 }
 module.exports = new ParseHelper();

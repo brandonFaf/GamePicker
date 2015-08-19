@@ -70,7 +70,7 @@ class Games extends React.Component{
       if (nextProps.isDouble) {
         var otherDouble = _.findIndex(this.state.ds,'isDouble', true);
         if (otherDouble == changed && otherDouble != -1) {
-          otherDouble = _findLastIndex(this.state.ds,'isDouble',true);
+          otherDouble = _.findLastIndex(this.state.ds,'isDouble',true);
         };
         if (otherDouble != changed && otherDouble != -1) {
           newDs[otherDouble] = {};
@@ -85,10 +85,6 @@ class Games extends React.Component{
         };
       };
       this.setDataSource(newDs);
-      // this.setState({
-      //   ds: newDs,
-      //   dataSource: this.state.dataSource.cloneWithRows(newDs)
-      // })
       this.state.update = false;
     }else{
       this.state.update= true;
@@ -98,11 +94,17 @@ class Games extends React.Component{
   getGames(fromLocal = true){
     console.log("network query");
     var columns = ['Week','HomeTeam','AwayTeam', 'Winner','Date','Time'];
-    ParseHelper.parseQuery('Games','Week',this.props.week, fromLocal, columns, (dataSource) =>{
-      ParseHelper.parseQuery('Selections','User',null,false,['Game','Selection','isDouble'], (selections) =>{
+    var dataSource;
+    ParseHelper.parseQuery('Games','Week',this.props.week, fromLocal, columns)
+    .then((dataSourceResult) =>{
+      dataSource = dataSourceResult
+      return ParseHelper.parseQuery('Selections','User',null,false,['Game','Selection','isDouble'],)
+    })
+    .then((selections) =>{
         // var selections = [];
         dataSource.forEach((n,i)=>{
           n.GameTime = new Date(n.Date + ' ' + n.Time);
+          n.Index = i;
           var choice = _.find(selections,'Game', n.objectID);
           if (choice) {
             n.Selection = choice.Selection;
@@ -116,7 +118,6 @@ class Games extends React.Component{
         });
         this.setDataSource(dataSource);
       });
-    });
   }
 
   setDataSource(dataSource){
@@ -138,6 +139,9 @@ class Games extends React.Component{
           return obj.GameTime.getTime() == n.GameTime.getTime();
         })
         rowIds[i] = [];
+        games.sort(function(a,b){
+          return a.Index - b.Index
+        })
         games.forEach((m,j)=>{
           rowIds[i].push(m.objectID);
           dataBlob[i+":"+m.objectID] = m
@@ -169,9 +173,6 @@ class Games extends React.Component{
         actAsAdmin:this.props.actAsAdmin
       }
     })
-  }
-  pressButton(){
-    // ParseHelper.callCloudMethod();
   }
 
   renderRow(rowData){

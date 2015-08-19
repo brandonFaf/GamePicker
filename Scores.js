@@ -23,7 +23,8 @@ class Scores extends React.Component{
   }
 
   componentDidMount(){
-    ParseHelper.getAllScores((results)=>{
+    ParseHelper.getAllScores()
+    .then(results=>{
       console.log(results);
       this.setState({
         score:results,

@@ -35,7 +35,8 @@ class Week extends React.Component{
     }
   }
   pressRow(rowData){
-    ParseHelper.getScoreForCurrentUser(rowData.week,score =>{
+    ParseHelper.getScoreForCurrentUser(rowData.week)
+    .then(score =>{
       this.props.navigator.push({
         title: 'Week '+ rowData.week + '   Score: '+score,
         component: Games,

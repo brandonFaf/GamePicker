@@ -1,15 +1,17 @@
 var ParseModule = require('NativeModules').ParseModule
 var _ = require('lodash');
 class ParseHelper {
-	parseQuery(classLookup, whereColumn, equalsValue, fromLocal, columns, cb){
-		var returnArray = [];
-		ParseModule.queryClass(classLookup,whereColumn,equalsValue, fromLocal, columns, (results) =>{
-			columns.unshift('objectID');
-			results.forEach((n,i) =>{
-				returnArray.push(_.zipObject(columns,n));
+	parseQuery(classLookup, whereColumn, equalsValue, fromLocal, columns){
+		return new Promise((resolve,reject)=>{
+			var returnArray = [];
+			ParseModule.queryClass(classLookup,whereColumn,equalsValue, fromLocal, columns, (results) =>{
+				columns.unshift('objectID');
+				results.forEach((n,i) =>{
+					returnArray.push(_.zipObject(columns,n));
+				});
+				resolve(returnArray);
 			});
-			cb(returnArray);
-		});
+		})
 	}
 	saveSelection(objectID, selectionId, selection, isDouble, cb){
 		ParseModule.saveSelection(objectID, selectionId, selection, isDouble, (savedId)=>{
@@ -22,20 +24,30 @@ class ParseHelper {
 	saveResult(objectID,selection,cb){
 		ParseModule.saveResult(objectID,selection,cb(selection));
 	}
-	getScoreForCurrentUser(week,cb){
-		ParseModule.getScoreForCurrentUser(week, ()=>cb(1), result=>cb(result));
+	getScoreForCurrentUser(week){
+		return new Promise((resolve, reject)=>{
+			ParseModule.getScoreForCurrentUser(week, ()=>cb(1), result=>resolve(result));
+		})
 	}
-	getAllScores(cb){
-		ParseModule.getAllScores((...results)=>cb(results));
+	getAllScores(){
+		return new Promise((resolve, reject)=>{
+			ParseModule.getAllScores((...results)=>resolve(results));
+		});
 	}
-	checkIfDoubleIsLegal(teamName,cb){
-		ParseModule.checkIfDoubleIsLegal(teamName,cont=>cb(cont));
+	checkIfDoubleIsLegal(teamName){
+		return new Promise((resolve,reject) => {
+			ParseModule.checkIfDoubleIsLegal(teamName,cont=>resolve(cont))
+		});
 	}
-	changeDoubleArray(shouldAdd,teamName,cb){
-		ParseModule.changeDoubleArray(shouldAdd,teamName, (result)=>cb())
+	changeDoubleArray(shouldAdd,teamName){
+		return new Promise((resolve,reject) =>{
+			ParseModule.changeDoubleArray(shouldAdd,teamName, (result)=>resolve())
+		})
 	}
 	setDouble(week,sectionId, cb){
-		ParseModule.setDouble(week,sectionId,(result)=>cb());
+		return new Promise((resolve,reject)=>{
+			ParseModule.setDouble(week,sectionId,(result)=>resolve());
+		})
 	}
 }
 module.exports = new ParseHelper();

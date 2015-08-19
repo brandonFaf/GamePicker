@@ -223,6 +223,20 @@ RCT_EXPORT_METHOD(setDouble:(NSNumber*)week selectionId:(NSString *)selectionId 
   
 }
 
+RCT_EXPORT_METHOD(getOthersPicks:(NSString *)gameId callback:(RCTResponseSenderBlock)callback){
+  PFQuery *query = [PFQuery queryWithClassName:@"Selections"];
+  [query whereKey:@"Game" equalTo:gameId];
+  [query whereKey:@"User" notEqualTo:[PFUser currentUser]];
+  [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error){
+    NSMutableArray *ret = [[NSMutableArray alloc]init];
+    for (PFObject *obj in objects) {
+      [ret addObject:obj[@"Selection"]];
+    }
+    callback([ret copy]);
+  }];
+  
+}
+
 RCT_EXPORT_METHOD(changeDoubleArray:(BOOL *)shouldAdd teamName:(NSString*)teamName callback:(RCTResponseSenderBlock)callback){
   [PFCloud callFunctionInBackground:@"changeDoubleArray" withParameters:@{@"userId":[PFUser currentUser].objectId,@"team":teamName, @"shouldAdd":[NSNumber numberWithBool:shouldAdd]} block:^(NSString* result, NSError* error){
     callback(@[result]);

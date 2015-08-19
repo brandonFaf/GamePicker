@@ -73,19 +73,24 @@ class Select extends Component{
       var selection = this.state.awaySelected ? "AwayTeam" : "HomeTeam"
       if(Date.now()< new Date(this.state.gameData.GameTime)){
         if (!this.state.isDouble) {
-          ParseHelper.checkIfDoubleIsLegal(this.state.gameData[selection],(cont)=>{
+          ParseHelper.checkIfDoubleIsLegal(this.state.gameData[selection])
+          .then((cont)=>{
             if (cont) {
-              ParseHelper.changeDoubleArray(true,this.state.gameData[selection],()=>{
-                ParseHelper.setDouble(this.state.gameData.Week, this.state.gameData.SelectionId,()=>{
-                  self.state.isDouble=!this.state.isDouble;
-                  this.returnToGame(this.state.gameData.SelectionId,selection);
-                });
-              })
+              return ParseHelper.changeDoubleArray(true,this.state.gameData[selection])
             }
             else{
-              this.setState({showError:true})
-            };
+              throw{message:"Double already exists"};
+            }
           })
+          .then(()=>{
+                return ParseHelper.setDouble(this.state.gameData.Week, this.state.gameData.SelectionId)
+              })
+          .then(()=>{
+                  self.state.isDouble=!this.state.isDouble;
+                  this.returnToGame(this.state.gameData.SelectionId,selection);
+          }).catch(err=>{
+              this.setState({showDoubleSelectedError:true})
+          });
         }
         else{
           ParseHelper.setDouble(this.state.gameData.Week, "", () => {
@@ -107,6 +112,9 @@ class Select extends Component{
     if(this.state.showDoubleError){
       possibleError = <Text style = {styles.errorText}>Please select who you think will win before selecting this as your double</Text>
     }
+    if (this.state.showDoubleSelectedError) {
+      possibleError = <Text style = {styles.errorText}>You have already selected that team as a double</Text>      
+    };
     var image;
     if (this.state.isDouble) {
       image = require('image!StarSelected')

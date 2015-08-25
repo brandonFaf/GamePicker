@@ -30,6 +30,15 @@
   [PFTwitterUtils initializeWithConsumerKey:keys[@"twitterConsumerKey"]
                              consumerSecret:keys[@"twitterConsumerSecret"]];
   
+  // Register for Push Notitications
+  UIUserNotificationType userNotificationTypes = (UIUserNotificationTypeAlert |
+                                                  UIUserNotificationTypeBadge |
+                                                  UIUserNotificationTypeSound);
+  UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:userNotificationTypes
+                                                                           categories:nil];
+  [application registerUserNotificationSettings:settings];
+  [application registerForRemoteNotifications];
+  
   NSURL *jsCodeLocation;
   
   /**
@@ -46,7 +55,7 @@
    * on the same Wi-Fi network.
    */
 #if !(TARGET_IPHONE_SIMULATOR)
-  jsCodeLocation = [NSURL URLWithString:@"http://10.0.0.6:8081/index.ios.bundle"];
+  jsCodeLocation = [NSURL URLWithString:@"http://10.1.150.65:8081/index.ios.bundle"];
 #else
   jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle"];
 #endif
@@ -72,6 +81,25 @@
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
   return YES;
+}
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+  // Store the deviceToken in the current installation and save it to Parse.
+  PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+  [currentInstallation setDeviceTokenFromData:deviceToken];
+  currentInstallation.channels = @[ @"global" ];
+  [currentInstallation saveInBackground];
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+  [PFPush handlePush:userInfo];
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+  PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+  if (currentInstallation.badge != 0) {
+    currentInstallation.badge = 0;
+    [currentInstallation saveEventually];
+  }
 }
 
 @end

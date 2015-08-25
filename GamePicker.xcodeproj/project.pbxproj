@@ -31,7 +31,6 @@
 		7FC97F251B60186D006B2AD6 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC97F1B1B60186D006B2AD6 /* QuartzCore.framework */; };
 		7FC97F261B60186D006B2AD6 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC97F1C1B60186D006B2AD6 /* Security.framework */; };
 		7FC97F271B60186D006B2AD6 /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC97F1D1B60186D006B2AD6 /* Social.framework */; };
-		7FC97F281B60186D006B2AD6 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC97F1E1B60186D006B2AD6 /* StoreKit.framework */; };
 		7FC97F291B60186D006B2AD6 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC97F1F1B60186D006B2AD6 /* SystemConfiguration.framework */; };
 		7FC97F351B60188F006B2AD6 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC97F341B60188F006B2AD6 /* libz.dylib */; };
 		7FC97F371B60189B006B2AD6 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC97F361B60189B006B2AD6 /* libsqlite3.dylib */; };
@@ -151,7 +150,6 @@
 		7FC97F1B1B60186D006B2AD6 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		7FC97F1C1B60186D006B2AD6 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		7FC97F1D1B60186D006B2AD6 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
-		7FC97F1E1B60186D006B2AD6 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		7FC97F1F1B60186D006B2AD6 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		7FC97F341B60188F006B2AD6 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		7FC97F361B60189B006B2AD6 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
@@ -186,7 +184,6 @@
 				7FC97F251B60186D006B2AD6 /* QuartzCore.framework in Frameworks */,
 				7FC97F261B60186D006B2AD6 /* Security.framework in Frameworks */,
 				7FC97F271B60186D006B2AD6 /* Social.framework in Frameworks */,
-				7FC97F281B60186D006B2AD6 /* StoreKit.framework in Frameworks */,
 				7FC97F291B60186D006B2AD6 /* SystemConfiguration.framework in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
@@ -325,7 +322,6 @@
 				7FC97F1B1B60186D006B2AD6 /* QuartzCore.framework */,
 				7FC97F1C1B60186D006B2AD6 /* Security.framework */,
 				7FC97F1D1B60186D006B2AD6 /* Social.framework */,
-				7FC97F1E1B60186D006B2AD6 /* StoreKit.framework */,
 				7FC97F1F1B60186D006B2AD6 /* SystemConfiguration.framework */,
 			);
 			name = Frameworks;
@@ -428,6 +424,14 @@
 					00E356ED1AD99517003FC87E = {
 						CreatedOnToolsVersion = 6.2;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
+					};
+					13B07F861A680F5B00A75B9A = {
+						DevelopmentTeam = BHH5UAGV5G;
+						SystemCapabilities = {
+							com.apple.InAppPurchase = {
+								enabled = 0;
+							};
+						};
 					};
 				};
 			};
@@ -682,6 +686,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = GamePicker;
+				PROVISIONING_PROFILE = "c9930d30-4543-45ee-b40a-a10f831c8a68";
 			};
 			name = Debug;
 		};
@@ -702,6 +707,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = GamePicker;
+				PROVISIONING_PROFILE = "c9930d30-4543-45ee-b40a-a10f831c8a68";
 			};
 			name = Release;
 		};

@@ -23,16 +23,37 @@ RCT_EXPORT_METHOD(updateSchedule:(RCTResponseSenderBlock)callback){
     if (error) {
       callback(@[]);
     }
-      else{
+    else{
       if (objects.count > 0) {
         for (PFObject *obj in objects) {
           obj[@"updated"] = [NSNumber numberWithBool:NO];
           [obj saveInBackground];
         }
-        callback(@[@"update"]);
+        PFQuery *newQuery = [PFQuery queryWithClassName:@"Games"];
+        newQuery.limit = 300;
+        [newQuery findObjectsInBackgroundWithBlock:^(NSArray *allGames, NSError *Error){
+          [PFObject pinAllInBackground:allGames block:^(BOOL succeed, NSError* saveError){
+            callback(@[]);
+          }];
+        }];
       }
       else{
-        callback(@[]);
+        PFQuery *localQuery = [PFQuery queryWithClassName:@"Games"];
+        [localQuery fromLocalDatastore];
+        [localQuery findObjectsInBackgroundWithBlock:^(NSArray *localGames, NSError *localError){
+          if (localGames.count == 0) {
+            PFQuery *newQuery = [PFQuery queryWithClassName:@"Games"];
+            newQuery.limit = 300;
+            [newQuery findObjectsInBackgroundWithBlock:^(NSArray *allGames, NSError *Error){
+              [PFObject pinAllInBackground:allGames block:^(BOOL succeed, NSError* saveError){
+                callback(@[]);
+              }];
+            }];
+          }
+          else{
+            callback(@[]);
+          }
+        }];
       }
     }
   }];
@@ -51,15 +72,11 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
   }
   
   if (fromLocal) {
-    //[query fromLocalDatastore];
+    [query fromLocalDatastore];
   }
   
   [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error){
-//    if (objects.count <10) {
-//      
-//      [PFObject unpinAllInBackground:objects];
-//    }
-    
+   
     NSMutableArray *returnArray = [[NSMutableArray alloc]init];
 
     for (PFObject* obj in objects) {
@@ -69,10 +86,6 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
         if ([obj[key] isKindOfClass:[PFObject class]]) {
           [buildingArray addObject:((PFObject*)obj[key]).objectId];
         }
-//        else if([obj[key] isKindOfClass:[NSDate class]]){
-//          NSString *date = [NSDateFormatter localizedStringFromDate:((NSDate*)obj[key]) dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterShortStyle];
-//          [buildingArray addObject:date];
-//        }
         else if(!(obj[key])){
           [buildingArray addObject:[NSNull null]];
         }
@@ -82,9 +95,6 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
         }
       }
       [returnArray addObject:buildingArray];
-    }
-    if (!fromLocal) {
-      [PFObject pinAllInBackground:objects];
     }
    
     callback(@[[returnArray copy]]);
@@ -128,7 +138,6 @@ RCT_EXPORT_METHOD(saveSelection:(NSString*)objectId selectionId:(NSString*)selec
     choice[@"isDouble"] = [NSNumber numberWithBool:isDouble];
     
     [choice saveInBackgroundWithBlock:^(BOOL succeed, NSError* error){
-//      [choice pinInBackgroundWithBlock:^(BOOL succeed, NSError* error){
       if (succeed) {
         NSLog(@"Yay %@", choice.objectId );
         callback(@[choice.objectId]);

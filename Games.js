@@ -91,11 +91,11 @@ class Games extends React.Component{
     }
   }
 
-  getGames(fromLocal = true){
+  getGames(){
     console.log("network query");
     var columns = ['Week','HomeTeam','AwayTeam', 'Winner','Date','Time'];
     var dataSource;
-    ParseHelper.parseQuery('Games','Week',this.props.week, fromLocal, columns)
+    ParseHelper.parseQuery('Games','Week',this.props.week, true, columns)
     .then((dataSourceResult) =>{
       dataSource = dataSourceResult
       return ParseHelper.parseQuery('Selections','User',null,false,['Game','Selection','isDouble'],)
@@ -157,9 +157,8 @@ class Games extends React.Component{
 
   componentDidMount(){
     // this.getGames(true);
-    ParseHelper.updateSchedule((update)=>{
-      var needsUpdate = update != null 
-      this.getGames(!needsUpdate);
+    ParseHelper.updateSchedule(()=>{ 
+      this.getGames();
     });
   }
   pressRow(rowData){
@@ -223,39 +222,14 @@ class Games extends React.Component{
     }
     var renderMeat;
     renderMeat = <View/>
-    if (this.props.actAsAdmin) {
-    renderMeat = <TabBarIOS >
-        <TabBarIOS.Item
-          title='List'
-          style={[styles.container, {paddingTop:40}]}
-          selected = {this.state.selectedTab == 'list'}
-          onPress={()=>this.setState({selectedTab: 'list'})}>
-          <ListView
-            dataSource = {this.state.dataSource}
-            renderRow = {this.renderRow.bind(this)}>
-          </ListView>
-        </TabBarIOS.Item>
-        <TabBarIOS.Item
-          title='Finalize'
-          selected = {this.state.selectedTab == 'Finalize'}
-          onPress={()=>this.setState({selectedTab: 'Finalize'})}>
-          <View style={styles.todo}>
-          <Text style = {styles.heading}>Click the button to start the quick select process</Text>
-          <TouchableHighlight onPress= {() =>this.pressButton()} style={styles.button}>
-            <Text style={styles.buttonText}>Start</Text>
-          </TouchableHighlight>
-          </View>
-        </TabBarIOS.Item>
-      </TabBarIOS>
-    }
-    else{
+    
       renderMeat = <ListView
             dataSource = {this.state.dataSource}
             renderRow = {this.renderRow.bind(this)}
             renderSectionHeader = {this.renderSectionHeader.bind(this)}>
 
           </ListView>
-    }
+
     return (
       <View style = {styles.container}>
       {renderMeat}

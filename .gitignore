@@ -30,3 +30,5 @@ npm-debug.log
 *.framework
 Keys.plist
 NotWorkingCloudCode.js
+images/
+iOS/Images*

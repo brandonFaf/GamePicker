@@ -29,7 +29,7 @@ class Week extends React.Component{
     });
 
     this.state = {
-      dataSource: ds.cloneWithRows([{week:'1',date:'Sept 9'},{week:2,date:'Sept 10'},{week:3,date:'Sept 11'},{week:4,date:'Sept 12'},{week:5,date:'Sept 13'},]),
+      dataSource: ds.cloneWithRows([{week:'1',date:'Sept 10'},{week:2,date:'Sept 17'},{week:3,date:'Sept 14'},{week:4,date:'Oct 1'},{week:5,date:'Oct 8'},{week:6,date:'Oct 15'},{week:7,date:'Oct 22'},{week:8,date:'Nov 1'},{week:9,date:'Nov 5'},{week:10,date:'Nov 12'},{week:11,date:'Nov 19'},{week:12,date:'Nov 26'},{week:13,date:'Dec 3'},{week:14,date:'Dec 10'},{week:15,date:'Dec 17'},{week:16,date:'Dec 24'},{week:17,date:'Jan 3'}, ]),
       selectedTab:'pick',
       images : TeamImages
     }

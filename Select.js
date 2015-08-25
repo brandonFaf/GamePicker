@@ -122,6 +122,7 @@ class Select extends Component{
     else{
       image = require('image!Star')
     };
+
     return(
       <View style = {{flex:1,flexDirection:'column'}}>
       <View style = {styles.container}>
@@ -131,7 +132,7 @@ class Select extends Component{
             underlayColor = '#F5FCFF'
           >
             <Image
-              source = {this.state.images["Baltimore"]}
+              source = {this.state.images[this.state.gameData.AwayTeam]}
               style = {[styles.pic, this.state.awaySelected && styles.selected]} />
           </TouchableHighlight>
           <Text style = {styles.teamText}>{this.state.gameData.AwayTeam}</Text>
@@ -143,7 +144,7 @@ class Select extends Component{
             underlayColor = '#F5FCFF'
           >
             <Image
-              source = {this.state.images.Denver}
+              source = {this.state.images[this.state.gameData.HomeTeam]}
               style = {[styles.pic, this.state.homeSelected &&styles.selected]} />  
           </TouchableHighlight>
           <Text style = {styles.teamText}>{this.state.gameData.HomeTeam}</Text>

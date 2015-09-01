@@ -12,7 +12,8 @@ var {
   View,
   TouchableHighlight,
   ActivityIndicatorIOS,
-  AlertIOS
+  AlertIOS,
+  TextInput,
 } = React;
 
 var SimpleAuthService = require('./SimpleAuthService');
@@ -28,7 +29,7 @@ class Login extends React.Component{
     this.setState = {
       showProgress:true
     }
-    SimpleAuthService.authorize()
+    SimpleAuthService.authorize(this.state.username)
       .then( isAdmin => {
         AlertIOS.alert(
           'Complete',
@@ -47,6 +48,7 @@ class Login extends React.Component{
     return (
       <View style = {styles.container}>
         <Text style = {styles.heading}>Game Picker</Text>
+        <TextInput onChangeText = {(text)=> this.setState({username:text})} style = {styles.input} placeholder = "Display Name" />
         <TouchableHighlight
           style= {styles.button}
           onPress = {this.loginTwiter.bind(this)}
@@ -77,6 +79,16 @@ var styles = StyleSheet.create({
     alignSelf: 'stretch',
     margin: 10,
     justifyContent:'center',
+  },
+  input:{
+    height: 50,
+    marginTop: 10,
+    padding:4,
+    fontSize:18,
+    borderWidth:1,
+    borderColor: '#48bbec',
+    margin:10,
+
   },
   buttonText:{
     fontSize:22,

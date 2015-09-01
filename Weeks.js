@@ -98,7 +98,7 @@ class Week extends React.Component{
           title = 'Scores'
           selected = {this.state.selectedTab == 'scores'}
           onPress = {()=>this.setState({selectedTab:'scores'})}>
-          <Scores/>
+          <Scores username = {this.props.username}/>
         </TabBarIOS.Item>
         {adminControls}
       </TabBarIOS>

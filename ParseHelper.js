@@ -22,7 +22,7 @@ class ParseHelper {
 		ParseModule.updateSchedule((result)=>cb(result));
 	}
 	saveResult(objectID,selection,cb){
-		ParseModule.saveResult(objectID,selection,cb(selection));
+		ParseModule.saveResult(objectID,selection,cb(0,selection));
 	}
 	getScoreForCurrentUser(week){
 		return new Promise((resolve, reject)=>{
@@ -44,9 +44,14 @@ class ParseHelper {
 			ParseModule.changeDoubleArray(shouldAdd,teamName, (result)=>resolve())
 		})
 	}
-	setDouble(week,sectionId, cb){
+	setDouble(week,sectionId){
 		return new Promise((resolve,reject)=>{
 			ParseModule.setDouble(week,sectionId,(result)=>resolve());
+		})
+	}
+	getOthersPicks(gameId){
+		return new Promise((resolve,reject)=>{
+			ParseModule.getOthersPicks(gameId,(results) => resolve(results));
 		})
 	}
 }

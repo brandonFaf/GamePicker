@@ -7,9 +7,9 @@ var userNameKey = 'userName';
 var isAdminKey = 'isAdmin';
 
 class SimpleAuthService {
-	authorize(){
+	authorize(username){
 		return new Promise((resolve, reject) =>{
-			ParseModule.login((user,isAdmin)=>{
+			ParseModule.login( username, (user,isAdmin)=>{
 				AsyncStorage.multiSet([[userNameKey, user],
 									   [isAdminKey, isAdmin.toString()]],
 				(err)=>

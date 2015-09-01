@@ -62,7 +62,7 @@ Parse.Cloud.define("getAllScores", function(request, response) {
 							};
 						};
 					})
-					scores.push([result.get("username"),count]);
+					scores.push([result.get("username"),count, result.get("doubles")]);
 				}
 			})
 		})

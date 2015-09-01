@@ -55,7 +55,9 @@
    * on the same Wi-Fi network.
    */
 #if !(TARGET_IPHONE_SIMULATOR)
-  jsCodeLocation = [NSURL URLWithString:@"http://10.1.150.65:8081/index.ios.bundle"];
+  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+  //jsCodeLocation = [NSURL URLWithString:@"http:/10.1.150.65:8081/index.ios.bundle"];
+
 #else
   jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle"];
 #endif

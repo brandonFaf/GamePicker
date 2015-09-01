@@ -25,7 +25,31 @@ class Select extends Component{
       homeSelected:props.gameData.Selection == 'HomeTeam',
       showError:false,
       isDouble:props.gameData.isDouble,
+      selectedAway:[],
+      selectedHome:[],
     }
+  }
+
+  componentDidMount(){
+    let selectedHome = [];
+    let selectedAway = [];
+    ParseHelper.getOthersPicks(this.state.gameData.objectID)
+    .then(results =>{
+      results.forEach(n=>{
+        if (n[1] == "AwayTeam") {
+          selectedAway.push(n[0]);
+          selectedHome.push("");
+        }
+        else{
+          selectedHome.push(n[0]);
+          selectedAway.push("");
+        }
+      })
+      this.setState({
+        selectedAway:selectedAway,
+        selectedHome:selectedHome
+      })
+    })
   }
 
   selectAndSave(selection){
@@ -35,7 +59,7 @@ class Select extends Component{
       this.setState({awaySelected:false, homeSelected:true});
     }
     if (this.props.actAsAdmin) {
-      ParseHelper.saveResult(this.state.gameDate.objectID, selection, this.returnToGame);
+      ParseHelper.saveResult(this.state.gameData.objectID, selection, this.returnToGame);
     }
     else{
       if(Date.now()< new Date(this.state.gameData.GameTime)){
@@ -125,40 +149,47 @@ class Select extends Component{
 
     return(
       <View style = {{flex:1,flexDirection:'column'}}>
-      <View style = {styles.container}>
-        <View style = {styles.teamContainer}>
+         <View style = {{top:60, paddingBottom:60, paddingTop:15,alignItems:'center'}}>
           <TouchableHighlight
-            onPress= {() => this.selectAndSave('AwayTeam')}
-            underlayColor = '#F5FCFF'
-          >
-            <Image
-              source = {this.state.images[this.state.gameData.AwayTeam]}
-              style = {[styles.pic, this.state.awaySelected && styles.selected]} />
+            onPress = {() =>this.doDouble()}
+            underlayColor = '#fff'>
+            <Image source = {image} style = {{ height:60, width:60}}/>
           </TouchableHighlight>
-          <Text style = {styles.teamText}>{this.state.gameData.AwayTeam}</Text>
+            <Text>Double</Text>
+          {possibleError}
         </View>
-          <Text style = {{fontSize:60, padding:10, top:10}}>@</Text>
-        <View style = {styles.teamContainer}>
-          <TouchableHighlight
-            onPress= {() => this.selectAndSave('HomeTeam')}
-            underlayColor = '#F5FCFF'
-          >
-            <Image
-              source = {this.state.images[this.state.gameData.HomeTeam]}
-              style = {[styles.pic, this.state.homeSelected &&styles.selected]} />  
-          </TouchableHighlight>
-          <Text style = {styles.teamText}>{this.state.gameData.HomeTeam}</Text>
+        <View style = {styles.container}>
+          <View style = {styles.teamContainer}>
+            <Text style = {styles.teamText}>{this.state.gameData.AwayTeam}</Text>
+            <TouchableHighlight
+              onPress= {() => this.selectAndSave('AwayTeam')}
+              underlayColor = '#F5FCFF'
+            >
+              <Image
+                source = {this.state.images[this.state.gameData.AwayTeam]}
+                style = {[styles.pic, this.state.awaySelected && styles.selected]} />
+            </TouchableHighlight>
+            {this.state.selectedAway.map(n =>{
+              return <Text style = {{padding:10, fontSize:15}}>{n}</Text>
+            })}
+          </View>
+            <Text style = {{fontSize:60, padding:10, top:10}}>@</Text>
+          <View style = {styles.teamContainer}>
+            
+            <Text style = {styles.teamText}>{this.state.gameData.HomeTeam}</Text>
+            <TouchableHighlight
+              onPress= {() => this.selectAndSave('HomeTeam')}
+              underlayColor = '#F5FCFF'
+            >
+              <Image
+                source = {this.state.images[this.state.gameData.HomeTeam]}
+                style = {[styles.pic, this.state.homeSelected &&styles.selected]} />  
+            </TouchableHighlight>
+            {this.state.selectedHome.map(n =>{
+              return <Text style = {{padding:10, fontSize:15}}>{n}</Text>
+            })}
+          </View>
         </View>
-      </View>
-      <View style = {{flex:2.5,alignItems:'center'}}>
-        <TouchableHighlight
-          onPress = {() =>this.doDouble()}
-          underlayColor = '#fff'>
-          <Image source = {image} style = {{ height:60, width:60}}/>
-        </TouchableHighlight>
-          <Text>Double</Text>
-        {possibleError}
-      </View>
       </View>
     )
   
@@ -170,10 +201,9 @@ var styles = StyleSheet.create({
     flexDirection:'row',
     justifyContent: 'center',
     alignItems:'flex-start',
-    paddingTop: 140,
   },
   teamText:{
-    paddingTop:10,
+    paddingBottom:10,
     fontSize:20
   },
   teamContainer:{
@@ -188,8 +218,8 @@ var styles = StyleSheet.create({
     backgroundColor:'#333'
   },
   selected:{
-    borderWidth:3,
-    borderColor:"#a7bc32"
+    borderWidth:8,
+    borderColor:"#45dd55"
   },
   errorText:{
     borderWidth:1,

@@ -41,7 +41,7 @@ var GamePicker = React.createClass({
     }
     if(this.state.isLoggedIn){
       return (
-        <AppContainer isAdmin = {this.state.isAdmin} />
+        <AppContainer isAdmin = {this.state.isAdmin} username = {this.state.username} />
       );
     }
     else{

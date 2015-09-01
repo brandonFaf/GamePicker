@@ -686,7 +686,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = GamePicker;
-				PROVISIONING_PROFILE = "c9930d30-4543-45ee-b40a-a10f831c8a68";
+				PROVISIONING_PROFILE = "67ef16ba-16d3-4a36-9a32-e42f9013f813";
 			};
 			name = Debug;
 		};
@@ -707,7 +707,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = GamePicker;
-				PROVISIONING_PROFILE = "c9930d30-4543-45ee-b40a-a10f831c8a68";
+				PROVISIONING_PROFILE = "67ef16ba-16d3-4a36-9a32-e42f9013f813";
 			};
 			name = Release;
 		};

@@ -102,17 +102,29 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
   }];
 };
 
-RCT_REMAP_METHOD(login,callback:(RCTResponseSenderBlock)callback){
+RCT_REMAP_METHOD(login,unsername:(NSString *)username callback:(RCTResponseSenderBlock)callback){
   [PFTwitterUtils logInWithBlock:^(PFUser *user, NSError *error) {
     if (!user) {
       NSLog(@"Uh oh. The user cancelled the Twitter login. %@", error);
       return;
     } else if (user.isNew) {
       NSLog(@"User signed up and logged in with Twitter!");
+      user.username = username;
+      NSLog(@"%@ %@",user.username, user[@"isAdmin"]);
+      [user saveInBackgroundWithBlock:^(BOOL succeed, NSError *err){
+        callback(@[user.username, [NSNumber numberWithBool:NO]]);
+      }];
     } else {
       NSLog(@"User logged in with Twitter! \n %@", user);
-            
-      callback(@[user.username, user[@"isAdmin"]]);
+      user.username = username;
+      NSLog(@"%@ %@",user.username, user[@"isAdmin"]);
+      NSNumber *isAdmin = [NSNumber numberWithBool:NO];
+      if (user[@"isAdmin"]) {
+        isAdmin = [NSNumber numberWithBool:YES];
+      }
+      [user saveInBackgroundWithBlock:^(BOOL succeed, NSError *err){
+        callback(@[user.username, isAdmin]);
+      }];
     }
   }];
 }
@@ -233,15 +245,22 @@ RCT_EXPORT_METHOD(setDouble:(NSNumber*)week selectionId:(NSString *)selectionId 
 }
 
 RCT_EXPORT_METHOD(getOthersPicks:(NSString *)gameId callback:(RCTResponseSenderBlock)callback){
+  PFObject *game = [PFQuery getObjectOfClass:@"Games" objectId:gameId];
   PFQuery *query = [PFQuery queryWithClassName:@"Selections"];
-  [query whereKey:@"Game" equalTo:gameId];
+  [query whereKey:@"Game" equalTo:game];
   [query whereKey:@"User" notEqualTo:[PFUser currentUser]];
+  [query includeKey:@"User"];
   [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error){
+    if (objects) {
     NSMutableArray *ret = [[NSMutableArray alloc]init];
     for (PFObject *obj in objects) {
-      [ret addObject:obj[@"Selection"]];
+      [ret addObject:@[((PFUser *)obj[@"User"]).username,obj[@"Selection"]]];
     }
-    callback([ret copy]);
+    callback(@[[ret copy]]);
+    }
+    else{
+      callback(@[]);
+    }
   }];
   
 }

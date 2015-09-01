@@ -53,16 +53,22 @@ class Select extends Component{
   }
 
   selectAndSave(selection){
-    if (selection == 'AwayTeam') {
-      this.setState({awaySelected:true, homeSelected:false});
-    }else{
-      this.setState({awaySelected:false, homeSelected:true});
-    }
+    
     if (this.props.actAsAdmin) {
+      if (selection == 'AwayTeam') {
+        this.setState({awaySelected:true, homeSelected:false});
+      }else{
+        this.setState({awaySelected:false, homeSelected:true});
+      }
       ParseHelper.saveResult(this.state.gameData.objectID, selection, this.returnToGame);
     }
     else{
       if(Date.now()< new Date(this.state.gameData.GameTime)){
+        if (selection == 'AwayTeam') {
+          this.setState({awaySelected:true, homeSelected:false});
+        }else{
+          this.setState({awaySelected:false, homeSelected:true});
+        }
         ParseHelper.saveSelection(this.state.gameData.objectID, this.state.gameData.SelectionId, selection, this.state.isDouble, this.returnToGame);
       }
       else{

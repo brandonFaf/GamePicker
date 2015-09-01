@@ -6,7 +6,7 @@ var TeamImages = {
 	"Buccaneers": require('image!Buccaneers'),
 	"Cardinals": require('image!Cardinals'),
 	"Chargers": require('image!Chargers'),
-	"Chicago": require('image!Chicago'),
+	"Bears": require('image!Bears'),
 	"Chiefs": require('image!Chiefs'),
 	"Colts": require('image!Colts'),
 	"Cowboys": require('image!Cowboys'),

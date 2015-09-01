@@ -26,15 +26,15 @@ class Login extends React.Component{
     }
   }
   loginTwiter(){
-    this.setState = {
+    this.setState({
       showProgress:true
-    }
+    });
     SimpleAuthService.authorize(this.state.username)
-      .then( isAdmin => {
+      .then(result => {
         AlertIOS.alert(
           'Complete',
-          'Welcome to Game Picker' + isAdmin)
-        this.props.onLogin(isAdmin);
+          `Welcome to KTB Pick 'em ${result.username}`);
+        this.props.onLogin(result);
       })
       .catch(error=>{
         AlertIOS.alert(

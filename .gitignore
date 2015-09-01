@@ -32,3 +32,5 @@ Keys.plist
 NotWorkingCloudCode.js
 images/
 iOS/Images*
+*.ipa
+*.xcodeproj

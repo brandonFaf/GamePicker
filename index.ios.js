@@ -50,8 +50,8 @@ var GamePicker = React.createClass({
       )
     }
   },
-  onLogin:function(isAdmin){
-    this.setState({isLoggedIn:true, isAdmin:isAdmin})
+  onLogin:function(result){
+    this.setState({isLoggedIn:true, isAdmin:result.isAdmin, username:result.username})
   },
   getInitialState:function(){
     return{

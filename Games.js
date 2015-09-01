@@ -189,7 +189,7 @@ class Games extends React.Component{
           <Text style={{fontSize:18}}>{rowData.AwayTeam} @ {rowData.HomeTeam} </Text>
           <View style={{flex:1, flexDirection:'row'}}>
             {double}
-            <Text style={[styles.dateText, correct && styles.correct, (!correct && rowData.Winner != undefined) && styles.incorrect]}>{rowData[rowData.Selection]}</Text>
+            <Text style={[styles.dateText, correct && styles.correct, (!correct && (rowData.Winner!="" && rowData.Winner != undefined)) && styles.incorrect]}>{rowData[rowData.Selection]}</Text>
           </View>
         </View>
       </TouchableHighlight>

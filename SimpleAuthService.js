@@ -17,7 +17,7 @@ class SimpleAuthService {
 					if(err){
 						reject(err);
 					}
-					resolve(isAdmin.toString());
+					resolve({isAdmin, username});
 				})
 			})
 		})

@@ -38,7 +38,7 @@ class Scores extends React.Component{
       this.setState({
         score:results,
         isLoading:false,
-        doubles:userStats[2],
+        doubles:userStats[2]||[],
       })
     });
   }

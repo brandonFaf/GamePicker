@@ -36,6 +36,7 @@ Parse.Cloud.define("getAllScores", function(request, response) {
 	var userQuery = new Parse.Query(Parse.User);
 	var scores = [];
 	var count=0;
+	userQuery.equalTo("league",request.params.league)
 	userQuery.each(function(result){
 		var promise = new Parse.Promise.as();
 		promise = promise.then(function(){

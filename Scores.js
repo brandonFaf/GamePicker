@@ -5,13 +5,20 @@
 'use strict';
 
 var React = require('react-native');
+var AsyncStorage = require('react-native').AsyncStorage
 var {
   AppRegistry,
   StyleSheet,
   Text,
   View,
   ActivityIndicatorIOS,
+  TouchableHighlight,
+  AlertIOS
 } = React;
+
+var userNameKey = 'userName';
+var isAdminKey = 'isAdmin';
+var leagueNameKey = 'leagueName';
 
 var ParseHelper = require('./ParseHelper');
 var _ = require('lodash');
@@ -24,7 +31,7 @@ class Scores extends React.Component{
   }
 
   componentDidMount(){
-    ParseHelper.getAllScores()
+    ParseHelper.getAllScores(this.props.league)
     .then(results=>{
       console.log(results);
       results.sort((a,b)=>{
@@ -41,6 +48,21 @@ class Scores extends React.Component{
         doubles:userStats[2]||[],
       })
     });
+  }
+  logOut(){
+    AsyncStorage.multiRemove([userNameKey,isAdminKey,leagueNameKey],
+        (err)=>
+        {
+          if(err){
+            AlertIOS.alert(
+            'error',
+            "not logged out " + err);
+            return;
+          }
+          AlertIOS.alert(
+          'Logged Out',
+          "You are logged out. Please close the app and open it again");
+        })
   }
   render() {
     if (this.state.isLoading) {
@@ -66,6 +88,12 @@ class Scores extends React.Component{
       <View style = {styles.differentContainer}>
         <Text style = {styles.title}>Doubles Used</Text>
         <Text style = {[styles.text,{textAlign:'center'}]}>{doublesString == "" ? "None" : doublesString}</Text>
+        <TouchableHighlight
+          style= {styles.button}
+          onPress = {this.logOut.bind(this)}
+        >
+          <Text style = {styles.buttonText}> Logout </Text>
+        </TouchableHighlight>
       </View>
       </View>
     );
@@ -101,6 +129,20 @@ var styles = StyleSheet.create({
   },
   bold: {
     fontWeight:'bold'
+  },
+    button:{
+    height: 50,
+    backgroundColor: '#0091CA',
+    alignSelf: 'stretch',
+    margin: 10,
+    top:30,
+    justifyContent:'center',
+  },
+    buttonText:{
+    fontSize:22,
+    color:'#FFF',
+    alignSelf:'center',
+    justifyContent:'center'
   },
 });
 

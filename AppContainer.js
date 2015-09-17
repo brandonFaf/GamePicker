@@ -25,7 +25,8 @@ class AppContainer extends React.Component{
           title:"Weeks",
           passProps:{
              isAdmin:this.props.isAdmin,
-             username:this.props.username
+             username:this.props.username,
+             league:this.props.league
           },
           }}/>
        

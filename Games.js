@@ -169,7 +169,8 @@ class Games extends React.Component{
       passProps:{
         gameData:rowData,
         update:false,
-        actAsAdmin:this.props.actAsAdmin
+        actAsAdmin:this.props.actAsAdmin,
+        league:this.props.league
       }
     })
   }

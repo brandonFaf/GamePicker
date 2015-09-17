@@ -27,13 +27,14 @@ class Select extends Component{
       isDouble:props.gameData.isDouble,
       selectedAway:[],
       selectedHome:[],
+      league:props.league
     }
   }
 
   componentDidMount(){
     let selectedHome = [];
     let selectedAway = [];
-    ParseHelper.getOthersPicks(this.state.gameData.objectID)
+    ParseHelper.getOthersPicks(this.state.gameData.objectID,this.state.league)
     .then(results =>{
       results.forEach(n=>{
         if (n[1] == "AwayTeam") {

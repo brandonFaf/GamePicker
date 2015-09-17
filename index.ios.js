@@ -19,12 +19,13 @@ var Login = require('./Login');
 
 var GamePicker = React.createClass({
   componentDidMount:function(){
-    SimpleAuthService.getAuthInfo((err,username, isAdmin)=>{
+    SimpleAuthService.getAuthInfo((err,username, isAdmin, leagueName)=>{
         this.setState({
           checkingAuth:false,
-          isLoggedIn: username != null,
+          isLoggedIn:username != null,
           username:username,
-          isAdmin:isAdmin
+          isAdmin:isAdmin,
+          league:leagueName
       });
     })
   },
@@ -41,7 +42,7 @@ var GamePicker = React.createClass({
     }
     if(this.state.isLoggedIn){
       return (
-        <AppContainer isAdmin = {this.state.isAdmin} username = {this.state.username} />
+        <AppContainer isAdmin = {this.state.isAdmin} username = {this.state.username} league = {this.state.league}/>
       );
     }
     else{
@@ -51,7 +52,7 @@ var GamePicker = React.createClass({
     }
   },
   onLogin:function(result){
-    this.setState({isLoggedIn:true, isAdmin:result.isAdmin, username:result.username})
+    this.setState({isLoggedIn:true, isAdmin:result.isAdmin, username:result.username, league: result.league})
   },
   getInitialState:function(){
     return{

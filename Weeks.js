@@ -43,7 +43,8 @@ class Week extends React.Component{
         passProps:{
           week:rowData.week,
           images:this.state.images,
-          actAsAdmin:this.state.selectedTab == 'results'
+          actAsAdmin:this.state.selectedTab == 'results',
+          league:this.props.league
 
         }
       })
@@ -98,7 +99,7 @@ class Week extends React.Component{
           title = 'Scores'
           selected = {this.state.selectedTab == 'scores'}
           onPress = {()=>this.setState({selectedTab:'scores'})}>
-          <Scores username = {this.props.username}/>
+          <Scores username = {this.props.username} league = {this.props.league}/>
         </TabBarIOS.Item>
         {adminControls}
       </TabBarIOS>

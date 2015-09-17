@@ -29,9 +29,9 @@ class ParseHelper {
 			ParseModule.getScoreForCurrentUser(week, ()=>cb(1), result=>resolve(result));
 		})
 	}
-	getAllScores(){
+	getAllScores(league){
 		return new Promise((resolve, reject)=>{
-			ParseModule.getAllScores((...results)=>resolve(results));
+			ParseModule.getAllScoresForLeague(league, (...results)=>resolve(results));
 		});
 	}
 	checkIfDoubleIsLegal(teamName){
@@ -49,9 +49,9 @@ class ParseHelper {
 			ParseModule.setDouble(week,sectionId,(result)=>resolve());
 		})
 	}
-	getOthersPicks(gameId){
+	getOthersPicks(gameId, league){
 		return new Promise((resolve,reject)=>{
-			ParseModule.getOthersPicks(gameId,(results) => resolve(results));
+			ParseModule.getOthersPicks(gameId,league,(results) => resolve(results));
 		})
 	}
 }

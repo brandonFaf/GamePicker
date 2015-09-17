@@ -16,19 +16,18 @@ RCT_EXPORT_MODULE();
 
 
 RCT_EXPORT_METHOD(updateSchedule:(RCTResponseSenderBlock)callback){
-  PFQuery *query = [PFQuery queryWithClassName:@"Games"];
+  PFQuery *query = [PFUser query];
   
-  [query whereKey:@"updated" equalTo:[NSNumber numberWithBool:YES]];
+  [query whereKey:@"objectId" equalTo:[PFUser currentUser].objectId];
+  [query whereKey:@"needsUpdate" equalTo:[NSNumber numberWithBool:YES]];
   [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error){
     if (error) {
       callback(@[]);
     }
     else{
       if (objects.count > 0) {
-        for (PFObject *obj in objects) {
-          obj[@"updated"] = [NSNumber numberWithBool:NO];
-          [obj saveInBackground];
-        }
+        objects[0][@"needsUpdate"] = [NSNumber numberWithBool:NO];
+        [objects[0] saveInBackground];
         PFQuery *newQuery = [PFQuery queryWithClassName:@"Games"];
         newQuery.limit = 300;
         [newQuery findObjectsInBackgroundWithBlock:^(NSArray *allGames, NSError *Error){
@@ -102,7 +101,24 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
   }];
 };
 
-RCT_REMAP_METHOD(login,unsername:(NSString *)username callback:(RCTResponseSenderBlock)callback){
+
+RCT_REMAP_METHOD(loginJonny, leage:(NSString *)league callback:(RCTResponseSenderBlock)callback){
+  PFUser *user = [PFUser user];
+  user.username = @"BrandonTopKrisBottom";
+  user.password = @"Password1";
+  user[@"league"] = @[league];
+  
+  [user signUpInBackgroundWithBlock:^(BOOL succeeded, NSError *error) {
+    if (!error) {
+      callback(@[user.username, [NSNumber numberWithBool:NO]]);
+      // Hooray! Let them use the app now.
+    } else {   NSString *errorString = [error userInfo][@"error"];   // Show the errorString somewhere and let the user try again.
+    }
+  }];
+}
+
+
+RCT_REMAP_METHOD(login,username:(NSString *)username leage:(NSString *)league callback:(RCTResponseSenderBlock)callback){
   [PFTwitterUtils logInWithBlock:^(PFUser *user, NSError *error) {
     if (!user) {
       NSLog(@"Uh oh. The user cancelled the Twitter login. %@", error);
@@ -110,6 +126,7 @@ RCT_REMAP_METHOD(login,unsername:(NSString *)username callback:(RCTResponseSende
     } else if (user.isNew) {
       NSLog(@"User signed up and logged in with Twitter!");
       user.username = username;
+      user[@"league"] = @[league];
       NSLog(@"%@ %@",user.username, user[@"isAdmin"]);
       [user saveInBackgroundWithBlock:^(BOOL succeed, NSError *err){
         callback(@[user.username, [NSNumber numberWithBool:NO]]);
@@ -192,8 +209,8 @@ RCT_EXPORT_METHOD(getScoreForCurrentUser:(NSNumber*)week errorCB:(RCTResponseSen
   }];
   
 }
-RCT_EXPORT_METHOD(getAllScores:(RCTResponseSenderBlock)callback){
-  [PFCloud callFunctionInBackground:@"getAllScores" withParameters:@{@"week":[NSNumber numberWithInt:0]} block:^(NSArray* result, NSError* error){
+RCT_EXPORT_METHOD(getAllScoresForLeague:(NSString *) league callback:(RCTResponseSenderBlock)callback){
+  [PFCloud callFunctionInBackground:@"getAllScores" withParameters:@{@"week":[NSNumber numberWithInt:0], @"league":league} block:^(NSArray* result, NSError* error){
     callback(result);
   }];
 }
@@ -244,7 +261,7 @@ RCT_EXPORT_METHOD(setDouble:(NSNumber*)week selectionId:(NSString *)selectionId 
   
 }
 
-RCT_EXPORT_METHOD(getOthersPicks:(NSString *)gameId callback:(RCTResponseSenderBlock)callback){
+RCT_EXPORT_METHOD(getOthersPicks:(NSString *)gameId league:(NSString*)league callback:(RCTResponseSenderBlock)callback){
   PFObject *game = [PFQuery getObjectOfClass:@"Games" objectId:gameId];
   PFQuery *query = [PFQuery queryWithClassName:@"Selections"];
   [query whereKey:@"Game" equalTo:game];
@@ -254,7 +271,10 @@ RCT_EXPORT_METHOD(getOthersPicks:(NSString *)gameId callback:(RCTResponseSenderB
     if (objects) {
     NSMutableArray *ret = [[NSMutableArray alloc]init];
     for (PFObject *obj in objects) {
-      [ret addObject:@[((PFUser *)obj[@"User"]).username,obj[@"Selection"]]];
+      NSLog(@"%@",obj[@"User"][@"league"]);
+      if ([obj[@"User"][@"league"][0] isEqualToString:league]) {
+        [ret addObject:@[((PFUser *)obj[@"User"]).username,obj[@"Selection"]]];
+      }
     }
     callback(@[[ret copy]]);
     }

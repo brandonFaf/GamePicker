@@ -18,6 +18,8 @@ var Weeks = require('./Weeks');
 class AppContainer extends React.Component{
   
   render() {
+    //show a navagtor component with the Weeks component inside
+    //pass properties of the user as props.
     return (
       <NavigatorIOS style = {{ flex:1}}
         initialRoute = {{

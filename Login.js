@@ -16,18 +16,23 @@ var {
   TextInput,
 } = React;
 
+// module for authentication
 var SimpleAuthService = require('./SimpleAuthService');
 
 class Login extends React.Component{
   constructor(props){
+    //perform base constructor
     super(props);
+    //set the initial state
     this.state = {
       showProgress:false,
       username:"",
       league:"",
     }
   }
+  //function for loging in with twitter
   loginTwiter(){
+    //require username and league fields
     if (this.state.username == "" || this.state.league == "")
     {
       AlertIOS.alert(
@@ -35,17 +40,22 @@ class Login extends React.Component{
           "Be sure you have provided a display name and league name"); 
       return;
     }
+    //show the user that something is happening
     this.setState({
       showProgress:true
     });
+    //use simple auth service to log in user
     SimpleAuthService.authorize(this.state.username,this.state.league)
       .then(result => {
+        //show a welcome prompt
         AlertIOS.alert(
           'Complete',
           `Welcome to KTB Pick 'em ${result.username}`);
+        //pass user properties up to parent component
         this.props.onLogin(result);
       })
       .catch(error=>{
+        //catch any errors, show alert explaining posible cause for error
         AlertIOS.alert(
           'error',
           "Be sure you are logged into Twitter in your settings") 
@@ -54,6 +64,8 @@ class Login extends React.Component{
   }
 
   render(){
+    //show text boxes for username and league
+    //show button that when pressed does the loginWithTwitter function
     return (
       <View style = {styles.container}>
         <Text style = {styles.heading}>KTB Pick 'em</Text>

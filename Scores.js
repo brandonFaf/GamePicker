@@ -25,23 +25,28 @@ var _ = require('lodash');
 
 class Scores extends React.Component{
   constructor(props){
+    //perform base constructor
     super(props);
+    //set initial state
     this.state = {score:0, isLoading:true};
 
   }
 
   componentDidMount(){
+    //call parse helper method to get all scores
     ParseHelper.getAllScores(this.props.league)
     .then(results=>{
-      console.log(results);
+      //sort based on score
       results.sort((a,b)=>{
         return b[1]-a[1];
       });
+      //get reference to props (for debugging)
       var p= this.props;
+      //find the current user in the results
       var userStats = _.find(results, (info)=>{
-        console.log(this.props.username);
         return info[0] == this.props.username;
       })
+      //update state with scores and double array
       this.setState({
         score:results,
         isLoading:false,
@@ -49,7 +54,9 @@ class Scores extends React.Component{
       })
     });
   }
+  //removes saved data from asyncStorage
   logOut(){
+    //remove keys
     AsyncStorage.multiRemove([userNameKey,isAdminKey,leagueNameKey],
         (err)=>
         {
@@ -65,6 +72,7 @@ class Scores extends React.Component{
         })
   }
   render() {
+    //show loading screen while getting scores
     if (this.state.isLoading) {
       return(
         <View style = {{flex:1, justifyContent:'center', alignItems:'center'}}>
@@ -75,6 +83,7 @@ class Scores extends React.Component{
         </View>
         )
     };
+    //set up the string to dispaly the doubles
     var doublesString = "";
     this.state.doubles.forEach(n=>{doublesString += n + ", "});
     return (

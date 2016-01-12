@@ -94,6 +94,9 @@ RCT_EXPORT_METHOD(queryClass:(NSString*)class whereColumn:(NSString*)col equalsV
     [query fromLocalDatastore];
   }
   
+  //need to set limit to get all the games(default is 100)
+  query.limit = 300;
+  
   //run the query
   [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error){
    

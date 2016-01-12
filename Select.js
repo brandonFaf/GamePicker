@@ -112,7 +112,8 @@ class Select extends Component{
           updatedGame:self.state.gameData.objectID,
           selectionId:savedId,
           actAsAdmin:self.props.actAsAdmin,
-          isDouble:self.state.isDouble
+          isDouble:self.state.isDouble,
+          league:self.state.league
         }
     });
   }

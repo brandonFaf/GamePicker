@@ -36,6 +36,7 @@ Parse.Cloud.define("getAllScores", function(request, response) {
 	var userQuery = new Parse.Query(Parse.User);
 	var scores = [];
 	var count=0;
+	console.log('league = ' + request.params.league);
 	userQuery.equalTo("league",request.params.league)
 	userQuery.each(function(result){
 		var promise = new Parse.Promise.as();
@@ -49,6 +50,7 @@ Parse.Cloud.define("getAllScores", function(request, response) {
 			var selectionQuery = new Parse.Query(Selection);
 			selectionQuery.equalTo("User", result);
 			selectionQuery.include("Game");
+			selectionQuery.limit(300);
 			selectionQuery.matchesQuery("Game",gameQuery);
 			return selectionQuery.find({
 				success:function(results){
